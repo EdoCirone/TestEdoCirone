@@ -15,7 +15,26 @@ public class InventoryManager : MonoBehaviour
 
     public IReadOnlyList<ItemData> ItemsInInventory => _itemsInInventory; //Espongo la lista per la ui con l'interfaccia ReadOnly perchè voglio leggere ma non modificare
 
-    public bool AddItem(ItemData item) 
+    public int MaxNumberOfItems => _maxNumberOfItems; //Espongo il numero massimo di item per generare slot vuoti nella ui
+
+    public event System.Action OnInventoryChanged; //Evento per notificare la UI quando l'inventario cambia, così da aggiornare la visualizzazione degli slot in base agli item presenti nell'inventario
+
+    public void Awake()
+    {
+        if (_playerStats == null)
+        {
+            Debug.LogWarning("PlayerStats reference is not assigned in InventoryManager.");
+        }
+
+        _itemsInInventory.Clear(); // Pulisco la lista per assicurarmi che sia vuota all'inizio
+
+        for (int i = 0; i < _maxNumberOfItems; i++) // Inizializzo la lista con null per avere sempre una lista con un numero di elementi pari al numero massimo di item, così da poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
+        {
+            _itemsInInventory.Add(null);
+        }
+    }
+
+    public bool AddItem(ItemData item)
     {
         if (item == null)
         {
@@ -23,14 +42,21 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        if (_itemsInInventory.Count >= _maxNumberOfItems)
+        for (int i = 0; i < _itemsInInventory.Count; i++) // Cerco un slot vuoto (null) per aggiungere l'item, così da mantenere la dimensione della lista sempre pari al numero massimo di item e poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
         {
-            Debug.LogWarning("Inventory is full!");
-            return false;
+            if (_itemsInInventory[i] == null)
+            {
+                _itemsInInventory[i] = item;
+                OnInventoryChanged?.Invoke(); // Notifico la UI che l'inventario è cambiato
+                return true;
+
+            }
+
         }
 
-        _itemsInInventory.Add(item);
-        return true;
+        Debug.LogWarning("Inventory is full!");
+        return false;
+
     }
 
     public void RemoveItem(int index)
@@ -40,7 +66,36 @@ public class InventoryManager : MonoBehaviour
             Debug.LogWarning("Invalid item index.");
             return;
         }
-        _itemsInInventory.RemoveAt(index);
+        _itemsInInventory[index] = null; // Imposto l'elemento a null invece di rimuoverlo dalla lista, così da mantenere la dimensione della lista sempre pari al numero massimo di item e poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
+        OnInventoryChanged?.Invoke();
+    }
+
+    public void MoveOrSwapItems(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= _itemsInInventory.Count || toIndex < 0 || toIndex >= _itemsInInventory.Count)
+        {
+            Debug.LogWarning("Invalid item index for move or swap.");
+            return;
+        }
+
+        if (fromIndex == toIndex)
+        {
+            Debug.LogWarning("Cannot move or swap item to the same index.");
+            return;
+        }
+
+        if (_itemsInInventory[fromIndex] == null)
+        {
+            Debug.LogWarning(" source slots is empty.");
+            return;
+        }
+
+        ItemData temp = _itemsInInventory[fromIndex]; // Salvo temporaneamente l'item da spostare o scambiare per evitare di perderlo durante l'operazione
+
+        _itemsInInventory[fromIndex] = _itemsInInventory[toIndex];
+        _itemsInInventory[toIndex] = temp;
+        OnInventoryChanged?.Invoke();
+
     }
 
     public void UseItem(int index)
@@ -83,14 +138,31 @@ public class InventoryManager : MonoBehaviour
     [ContextMenu("Use Test Item")]
     private void UseFirstItemForDebug()
     {
-        if (_itemsInInventory.Count > 0)
+        for (int i = 0; i < _itemsInInventory.Count; i++)
         {
-            UseItem(0); // Usa il primo item nella lista per testare
+            if (_itemsInInventory[i] != null)
+            {
+                UseItem(i);
+                return;
+            }
         }
-        else
+
+        Debug.LogWarning("No items in inventory to use.");
+    }
+
+    [ContextMenu("Remove First Item")]
+    private void RemoveFirstItemForDebug()
+    {
+        for (int i = 0; i < _itemsInInventory.Count; i++)
         {
-            Debug.LogWarning("No items in inventory to use.");
+            if (_itemsInInventory[i] != null)
+            {
+                RemoveItem(i);
+                return;
+            }
         }
+
+        Debug.LogWarning("No items to remove.");
     }
 
     #endregion

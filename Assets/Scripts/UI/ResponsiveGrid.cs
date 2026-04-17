@@ -6,10 +6,7 @@ using UnityEngine.UI;
 public class ResponsiveGrid : MonoBehaviour
 {
 
-
-    [Header("Grid Settings")]
-    [SerializeField] private int _numberOfColumns = 3;
-    [SerializeField] private int _numberOfRows = 3;
+    [SerializeField] private int _itemCount = 9; // Numero totale di item da visualizzare ( dinamico in base all'inventario)
 
     private GridLayoutGroup _gridLayoutGroup;
     private RectTransform _containerRectTransform;
@@ -37,16 +34,25 @@ public class ResponsiveGrid : MonoBehaviour
         UpdateGridCellSize();
     }
 
+    public void SetItemCount(int count)
+    {
+        _itemCount = count;
+        UpdateGridCellSize();
+    }
+
     private void UpdateGridCellSize()
     {
         if (_gridLayoutGroup == null || _containerRectTransform == null)
             return;
         
-        float paddingX = _gridLayoutGroup.padding.left + _gridLayoutGroup.padding.right + _gridLayoutGroup.spacing.x * (_numberOfColumns - 1); //Calcolo del padding totale in orizzontale
-        float paddingY = _gridLayoutGroup.padding.top + _gridLayoutGroup.padding.bottom + _gridLayoutGroup.spacing.y * (_numberOfRows - 1); // Calcolo del padding totale in verticale
+        int numberOfColumns = Mathf.Max(1,_gridLayoutGroup.constraintCount); // Prendo il numero di colonne dal GridLayoutGroup, assicurandomi che sia almeno 1
+        int numberOfRows = Mathf.CeilToInt((float)_itemCount / numberOfColumns); // Calcolo il numero di righe necessario in base al numero di item e colonne
+
+        float paddingX = _gridLayoutGroup.padding.left + _gridLayoutGroup.padding.right + _gridLayoutGroup.spacing.x * (numberOfColumns - 1); //Calcolo del padding totale in orizzontale
+        float paddingY = _gridLayoutGroup.padding.top + _gridLayoutGroup.padding.bottom + _gridLayoutGroup.spacing.y * (numberOfRows - 1); // Calcolo del padding totale in verticale
         
-        float cellWidth = (_containerRectTransform.rect.width - paddingX) / _numberOfColumns; 
-        float cellHeight = (_containerRectTransform.rect.height - paddingY) / _numberOfRows; 
+        float cellWidth = (_containerRectTransform.rect.width - paddingX) / numberOfColumns; 
+        float cellHeight = (_containerRectTransform.rect.height - paddingY) / numberOfRows; 
         
         float size = Mathf.Min(cellWidth, cellHeight);// Prendo la dimensione più piccola per mantenere le celle quadrate
         
