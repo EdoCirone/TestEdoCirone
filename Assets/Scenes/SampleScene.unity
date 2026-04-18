@@ -945,7 +945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3879b1ccbc4d96143942b5359ee8d464, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
-  _maxNumberOfItems: 15
+  _maxNumberOfItems: 9
   _playerStats: {fileID: 1670088639}
   _itemsInInventory: []
 --- !u!1 &755620581
