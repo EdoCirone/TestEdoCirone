@@ -3,9 +3,12 @@ using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private InventoryManager _inventoryManager;
     [SerializeField] private RectTransform _slotContainer;
+    [SerializeField] private RectTransform _inventoryPanel;
     [SerializeField] private GameObject _slotPrefab;
+
 
     private InventorySlotUI[] _slots;
     private ResponsiveGrid _responsiveGrid;
@@ -78,7 +81,7 @@ public class InventoryUI : MonoBehaviour
         {
             if (_slots[i] == null) continue; // Salto slot nulli per evitare errori
 
-            _slots[i].Initialize(_inventoryManager, i); // Inizializzo ogni slot passando l'indice e il riferimento all'inventario per poter gestire l'uso degli item al click dello slot
+            _slots[i].Initialize(_inventoryManager, i, _inventoryPanel); // Inizializzo ogni slot passando l'indice e il riferimento all'inventario per poter gestire l'uso degli item al click dello slot
         }
 
         RefreshInventoryUI();

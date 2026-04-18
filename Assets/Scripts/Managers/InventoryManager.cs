@@ -7,8 +7,10 @@ public class InventoryManager : MonoBehaviour
     //quindi può essere istanziato più volte se necessario (es. per più player o per NPC con inventari).
     //Se fosse un manager globale allora si potrebbe considerare di renderlo singleton,
     //ma in questo caso non è necessario e potrebbe limitare la flessibilità del design.
-
+    [Header("Inventory Settings")]
     [SerializeField] private int _maxNumberOfItems = 9;
+    
+    [Header("References")]
     [SerializeField] private PlayerStats _playerStats;
 
     [SerializeField] private List<ItemData> _itemsInInventory = new List<ItemData>();
@@ -19,7 +21,7 @@ public class InventoryManager : MonoBehaviour
 
     public event System.Action OnInventoryChanged; //Evento per notificare la UI quando l'inventario cambia, così da aggiornare la visualizzazione degli slot in base agli item presenti nell'inventario
 
-    public void Awake()
+    private void Awake()
     {
         if (_playerStats == null)
         {
@@ -163,6 +165,12 @@ public class InventoryManager : MonoBehaviour
         }
 
         Debug.LogWarning("No items to remove.");
+    }
+
+    [ContextMenu("Swap Slot 0 And 1")]
+    private void SwapFirstTwoSlotsForDebug()
+    {
+        MoveOrSwapItems(0, 1);
     }
 
     #endregion

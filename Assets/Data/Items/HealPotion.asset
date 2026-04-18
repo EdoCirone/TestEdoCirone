@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: HealPotion
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   _itemName: Heal Potion
-  _itemIcon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  _itemIcon: {fileID: 21300110, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
   _description: Pozione di Cura
   _amount: 20
   _effect: {fileID: 11400000, guid: b46b2782c7eeec24e84056731b67b4e4, type: 2}

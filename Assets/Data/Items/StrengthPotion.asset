@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StrengthPotion
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   _itemName: Strength Potion
-  _itemIcon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  _itemIcon: {fileID: 21300118, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
   _description: potion that incrase your Strength
   _amount: 5
   _effect: {fileID: 11400000, guid: 2e6398b45de4e674fa704f20c7b48c96, type: 2}
