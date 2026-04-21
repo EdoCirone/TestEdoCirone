@@ -9,7 +9,7 @@ public class InventoryManager : MonoBehaviour
     //ma in questo caso non è necessario e potrebbe limitare la flessibilità del design.
     [Header("Inventory Settings")]
     [SerializeField] private int _maxNumberOfItems = 9;
-    
+
     [Header("References")]
     [SerializeField] private PlayerStats _playerStats;
 
@@ -19,7 +19,14 @@ public class InventoryManager : MonoBehaviour
 
     public int MaxNumberOfItems => _maxNumberOfItems; //Espongo il numero massimo di item per generare slot vuoti nella ui
 
+    #region events
+
+
     public event System.Action OnInventoryChanged; //Evento per notificare la UI quando l'inventario cambia, così da aggiornare la visualizzazione degli slot in base agli item presenti nell'inventario
+    public event System.Action OnInventoryFull; //Evento per notificare quando l'inventario è pieno, così da poter mostrare un messaggio o un feedback al giocatore se cerca di aggiungere un item quando l'inventario è già pieno
+
+
+    #endregion
 
     private void Awake()
     {
@@ -57,6 +64,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         Debug.LogWarning("Inventory is full!");
+        OnInventoryFull?.Invoke(); // Notifico che l'inventario è pieno, così da poter mostrare un messaggio o un feedback al giocatore se cerca di aggiungere un item quando l'inventario è già pieno
         return false;
 
     }
@@ -82,13 +90,12 @@ public class InventoryManager : MonoBehaviour
 
         if (fromIndex == toIndex)
         {
-            Debug.LogWarning("Cannot move or swap item to the same index.");
             return;
         }
 
         if (_itemsInInventory[fromIndex] == null)
         {
-            Debug.LogWarning(" source slots is empty.");
+            Debug.LogWarning("Source slots is empty.");
             return;
         }
 
@@ -99,6 +106,7 @@ public class InventoryManager : MonoBehaviour
         OnInventoryChanged?.Invoke();
 
     }
+
 
     public void UseItem(int index)
     {

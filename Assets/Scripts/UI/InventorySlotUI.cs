@@ -10,6 +10,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private RectTransform _inventoryPanel;
     private Canvas _canvas; //Mi serve per parentare l'icona e farla stare visivamente sopra tutto
     private int _slotIndex;
+    private PlayerItemDropper _playerItemDropped; //Riferimento al componente che si occupa di droppare gli item nel mondo
     private static InventorySlotUI _draggedItem; // Variabile STATICA per tenere traccia dell'indice dello slot dell'item attualmente trascinato
 
     private bool _isDroppedSuccessfully = false;
@@ -17,11 +18,12 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
 
 
-    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel) //Uso questo metodo perchè il mio inventory non è singleton quindi ho bisogno di passare i riferimenti.
+    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel, PlayerItemDropper playerItemDropper) //Uso questo metodo perchè il mio inventory non è singleton quindi ho bisogno di passare i riferimenti.
     {
         _slotIndex = index;
         _inventoryManager = inventoryManager;
         _inventoryPanel = inventoryPanel; // passo il riferimento al pannello dell'inventario per poterlo usare come riferimento quando voglio posare a terra degli item
+        _playerItemDropped = playerItemDropper; // passo il riferimento al componente che si occupa di droppare gli item nel mondo per poterlo usare quando voglio posare a terra degli item
         _canvas = _inventoryPanel.GetComponentInParent<Canvas>();
     }
 
@@ -83,7 +85,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (_inventoryManager.ItemsInInventory[_slotIndex] == null)
         {
-            Debug.LogWarning("No item in slot index: " + _slotIndex);
             return;
         }
 
@@ -114,7 +115,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
 
         _iconCopy.transform.position = eventData.position; // Sposto lo slot seguendo il mouse durante il drag, così da avere un feedback visivo del drag dell'item
-        Debug.Log("Dragging slot index: " + _slotIndex);
+        //Debug.Log("Dragging slot index: " + _slotIndex);
     }
 
     public void OnEndDrag(PointerEventData eventData) // viene chiamato sullo slot di partenza
@@ -143,12 +144,36 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
-        Debug.Log("Dropped outside inventory panel.");
-        _itemIcon.enabled = true;
+        if (_playerItemDropped == null)
+        {
+            Debug.LogWarning("PlayerItemDropper reference is missing.");
+            _itemIcon.enabled = true;
+            CleanupDrag();
+            return;
+        }
+
+        ItemData itemToDrop = _inventoryManager.ItemsInInventory[_slotIndex];
+
+        if (itemToDrop == null)
+        {
+            _itemIcon.enabled = true;
+            CleanupDrag();
+            return;
+        }
+
+        bool droppedSuccessfully = _playerItemDropped.TryDropItemOutside(itemToDrop, eventData.position);
+
+        if (droppedSuccessfully)
+        {
+            _inventoryManager.RemoveItem(_slotIndex);
+        }
+        else
+        {
+            _itemIcon.enabled = true;
+        }
+
         CleanupDrag();
     }
-
-
 
     public void OnDrop(PointerEventData eventData)
     {
@@ -160,13 +185,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (_draggedItem == null)
         {
-            Debug.Log("No item is being dragged.");
             return;
         }
 
         if (_draggedItem == this)
         {
-            Debug.Log("Cannot drop on the same slot.");
             return;
         }
 
@@ -176,13 +199,14 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         Debug.Log("Dropped on slot index: " + _slotIndex);
     }
 
-    public void CleanupDrag()
+    private void CleanupDrag()
     {
         if (_iconCopy != null)
         {
             Destroy(_iconCopy.gameObject); // Distruggo la copia dell'icona creata per il drag, così da pulire la scena dopo il drag
             _iconCopy = null;
         }
+        _isDroppedSuccessfully = false; // Resetto la variabile di successo del drop a false, così da essere pronto per un nuovo drag
         _draggedItem = null; // Resetto la variabile statica dell'indice dello slot dell'item attualmente trascinato, così da essere pronto per un nuovo drag
     }
 

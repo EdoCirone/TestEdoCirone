@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
@@ -6,7 +7,9 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private InventoryManager _inventoryManager;
     [SerializeField] private RectTransform _slotContainer;
     [SerializeField] private RectTransform _inventoryPanel;
+    [SerializeField] private RectTransform _fullInventoryMessagePanel;
     [SerializeField] private GameObject _slotPrefab;
+    [SerializeField] private PlayerItemDropper _playerItemDropper;
 
 
     private InventorySlotUI[] _slots;
@@ -80,7 +83,7 @@ public class InventoryUI : MonoBehaviour
         {
             if (_slots[i] == null) continue; // Salto slot nulli per evitare errori
 
-            _slots[i].Initialize(_inventoryManager, i, _inventoryPanel); // Inizializzo ogni slot passando l'indice e il riferimento all'inventario per poter gestire l'uso degli item al click dello slot
+            _slots[i].Initialize(_inventoryManager, i, _inventoryPanel, _playerItemDropper); // Inizializzo ogni slot passando l'indice e il riferimento all'inventario per poter gestire l'uso degli item al click dello slot
         }
 
         RefreshInventoryUI();
@@ -90,7 +93,8 @@ public class InventoryUI : MonoBehaviour
     {
         if (_inventoryManager != null)
         {
-            _inventoryManager.OnInventoryChanged += RefreshInventoryUI; // Mi iscrivo all'evento di cambio dell'inventario per aggiornare la UI ogni volta che l'inventario cambia
+            _inventoryManager.OnInventoryChanged += RefreshInventoryUI; // Mi iscrivo agli eventi
+            _inventoryManager.OnInventoryFull += ShowFullInventoryMessage;
         }
     }
 
@@ -98,7 +102,8 @@ public class InventoryUI : MonoBehaviour
     {
         if (_inventoryManager != null)
         {
-            _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; // Mi disiscrivo dall'evento quando la UI viene disabilitata per evitare errori di riferimento nulli
+            _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; // Mi disiscrivo dagli eventi per evitare memory leak o errori quando l'oggetto viene disabilitato o distrutto
+            _inventoryManager.OnInventoryFull -= ShowFullInventoryMessage;
         }
     }
 
@@ -124,6 +129,8 @@ public class InventoryUI : MonoBehaviour
             }
         }
 
+        if (_fullInventoryMessagePanel != null) HideFullInventoryMessage();
+
     }
 
     private void ClearSlotContainer()
@@ -133,6 +140,26 @@ public class InventoryUI : MonoBehaviour
         {
             Destroy(_slotContainer.GetChild(i).gameObject); // Distruggo tutti i figli del container per pulire la griglia prima di creare nuovi slot
         }
+    }
+
+    private void ShowFullInventoryMessage()
+    {
+        if (_fullInventoryMessagePanel == null)
+        {
+            Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
+            return;
+        }
+        _fullInventoryMessagePanel.gameObject.SetActive(true); // Mostro il pannello del messaggio di inventario pieno
+    }
+
+    private void HideFullInventoryMessage()
+    {
+        if (_fullInventoryMessagePanel == null)
+        {
+            Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
+            return;
+        }
+        _fullInventoryMessagePanel.gameObject.SetActive(false); // Nascondo il pannello del messaggio di inventario pieno
     }
 
 }
