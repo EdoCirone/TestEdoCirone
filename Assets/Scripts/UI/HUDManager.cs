@@ -11,19 +11,43 @@ public class HUDManager : MonoBehaviour
     [Header("Player References")]
     [SerializeField] private PlayerStats _playerStats;
 
+    private void OnEnable()
+    {
+        if (_playerStats == null) return;
+
+        _playerStats.OnHealthChanged += UpdateHealthBar;
+        _playerStats.OnStatsChanged += UpdateStats;
+    }
+
+    private void OnDisable()
+    {
+        if (_playerStats == null) return;
+
+        _playerStats.OnHealthChanged -= UpdateHealthBar;
+        _playerStats.OnStatsChanged -= UpdateStats;
+
+    }
+
     private void Start()
     {
         if (_playerStats == null)
         {
-            Debug.LogError("PlayerController reference is missing in HUDManager.");
+            Debug.LogError("Player reference is missing in HUDManager.");
             return;
         }
-        UpdateHealthBar();
-        UpdateStats();
-    }
 
-    private void Update()
-    {
+        if (_healthBar == null)
+        {
+            Debug.LogError("Health Bar reference is missing in HUDManager.");
+            return;
+        }
+        if (_textStats == null)
+        {
+
+            Debug.LogError("Text Stats reference is missing in HUDManager.");
+            return;
+        }
+
         UpdateHealthBar();
         UpdateStats();
     }

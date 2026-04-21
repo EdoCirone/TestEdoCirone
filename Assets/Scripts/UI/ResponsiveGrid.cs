@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class ResponsiveGrid : MonoBehaviour
 {
 
-    [SerializeField] private int _itemCount = 9; // Numero totale di item da visualizzare ( dinamico in base all'inventario)
+    [SerializeField] private int _slotCount = 9; // Numero totale di item da visualizzare ( dinamico in base all'inventario)
 
     private GridLayoutGroup _gridLayoutGroup;
     private RectTransform _containerRectTransform;
@@ -34,9 +34,9 @@ public class ResponsiveGrid : MonoBehaviour
         UpdateGridCellSize();
     }
 
-    public void SetItemCount(int count)
+    public void SetSlotCount(int count)
     {
-        _itemCount = count;
+        _slotCount = count;
         UpdateGridCellSize();
     }
 
@@ -46,7 +46,7 @@ public class ResponsiveGrid : MonoBehaviour
             return;
         
         int numberOfColumns = Mathf.Max(1,_gridLayoutGroup.constraintCount); // Prendo il numero di colonne dal GridLayoutGroup, assicurandomi che sia almeno 1
-        int numberOfRows = Mathf.CeilToInt((float)_itemCount / numberOfColumns); // Calcolo il numero di righe necessario in base al numero di item e colonne
+        int numberOfRows = Mathf.CeilToInt((float)_slotCount / numberOfColumns); // Calcolo il numero di righe necessario in base al numero di item e colonne
 
         float paddingX = _gridLayoutGroup.padding.left + _gridLayoutGroup.padding.right + _gridLayoutGroup.spacing.x * (numberOfColumns - 1); //Calcolo del padding totale in orizzontale
         float paddingY = _gridLayoutGroup.padding.top + _gridLayoutGroup.padding.bottom + _gridLayoutGroup.spacing.y * (numberOfRows - 1); // Calcolo del padding totale in verticale

@@ -10,8 +10,8 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     private RectTransform _inventoryPanel;
     private Canvas _canvas; //Mi serve per parentare l'icona e farla stare visivamente sopra tutto
     private int _slotIndex;
-    private PlayerItemDropper _playerItemDropped; //Riferimento al componente che si occupa di droppare gli item nel mondo
-    private static InventorySlotUI _draggedItem; // Variabile STATICA per tenere traccia dell'indice dello slot dell'item attualmente trascinato
+    private PlayerItemDropper _playerItemDropper; //Riferimento al componente che si occupa di droppare gli item nel mondo
+    private static InventorySlotUI _draggedItem; // Variabile STATICA per tenere traccia dell'indice dello slot dell'item attualmente trascinato DA CAMBIARE SE SI VOGLIONO PIU' INVENTARI
 
     private bool _isDroppedSuccessfully = false;
     private Image _iconCopy;
@@ -23,7 +23,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         _slotIndex = index;
         _inventoryManager = inventoryManager;
         _inventoryPanel = inventoryPanel; // passo il riferimento al pannello dell'inventario per poterlo usare come riferimento quando voglio posare a terra degli item
-        _playerItemDropped = playerItemDropper; // passo il riferimento al componente che si occupa di droppare gli item nel mondo per poterlo usare quando voglio posare a terra degli item
+        _playerItemDropper = playerItemDropper; // passo il riferimento al componente che si occupa di droppare gli item nel mondo per poterlo usare quando voglio posare a terra degli item
         _canvas = _inventoryPanel.GetComponentInParent<Canvas>();
     }
 
@@ -88,7 +88,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
-        Debug.Log("Begin Drag on slot index: " + _slotIndex);
 
         _draggedItem = this; // Imposto l'indice dello slot dell'item attualmente trascinato nella variabile statica 
 
@@ -115,7 +114,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
 
         _iconCopy.transform.position = eventData.position; // Sposto lo slot seguendo il mouse durante il drag, così da avere un feedback visivo del drag dell'item
-        //Debug.Log("Dragging slot index: " + _slotIndex);
     }
 
     public void OnEndDrag(PointerEventData eventData) // viene chiamato sullo slot di partenza
@@ -131,7 +129,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (_isDroppedSuccessfully)
         {
-            Debug.Log("End Drag on slot index: " + _slotIndex + " with successful drop.");
             CleanupDrag();
             return;
         }
@@ -139,12 +136,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (releasedInsideInventoryPanel)
         {
             _itemIcon.enabled = true;
-            Debug.Log("End Drag inside inventory panel but outside slots. Returning to original slot.");
             CleanupDrag();
             return;
         }
 
-        if (_playerItemDropped == null)
+        if (_playerItemDropper == null)
         {
             Debug.LogWarning("PlayerItemDropper reference is missing.");
             _itemIcon.enabled = true;
@@ -161,7 +157,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
-        bool droppedSuccessfully = _playerItemDropped.TryDropItemOutside(itemToDrop, eventData.position);
+        bool droppedSuccessfully = _playerItemDropper.TryDropItemOutside(itemToDrop, eventData.position);
 
         if (droppedSuccessfully)
         {
@@ -196,7 +192,6 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         _inventoryManager.MoveOrSwapItems(_draggedItem._slotIndex, _slotIndex);
         _draggedItem._isDroppedSuccessfully = true; // Imposto la variabile di successo del drop a true, così da sapere che l'item è stato posato con successo e non deve essere riposizionato al punto di partenza nel metodo OnEndDrag dello slot di partenza
 
-        Debug.Log("Dropped on slot index: " + _slotIndex);
     }
 
     private void CleanupDrag()

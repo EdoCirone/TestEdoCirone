@@ -15,29 +15,43 @@ public class PlayerStats : MonoBehaviour
     public float Strength => _strength;
     public float CurrentHealth => _currentHealth;
 
+    #region events
+
+    public event System.Action OnHealthChanged;
+    public event System.Action OnStatsChanged;
+
+    #endregion
+
     private void Start()
     {
-        _currentHealth = _maxHealth * 0.5f;
+        _currentHealth = _maxHealth * 0.5f; //Inizializzo a metà per gestire i test di Healt e Damage
+        OnHealthChanged?.Invoke();
+        OnStatsChanged?.Invoke();
     }
 
     public void Heal(float amount)
     {
-        _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _maxHealth)
-  ;
+        _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _maxHealth);
+        OnHealthChanged?.Invoke();
+
     }
 
     public void TakeDamage(float amount)
     {
         _currentHealth = Mathf.Clamp(_currentHealth - amount, 0, _maxHealth);
+        OnHealthChanged?.Invoke();
     }
 
     public void UpdateSpeed(float amount)
     {
-               _speed += amount;
+        _speed = Mathf.Max(0, _speed + amount);
+        OnStatsChanged?.Invoke();
     }
 
     public void UpdateStrength(float amount)
     {
-        _strength += amount;
+        _strength = Mathf.Max(0, _strength + amount);
+        OnStatsChanged?.Invoke();
+
     }
 }

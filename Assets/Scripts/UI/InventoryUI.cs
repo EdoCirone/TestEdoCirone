@@ -1,5 +1,5 @@
-using System.Collections;
 using UnityEngine;
+
 
 public class InventoryUI : MonoBehaviour
 {
@@ -14,6 +14,7 @@ public class InventoryUI : MonoBehaviour
 
     private InventorySlotUI[] _slots;
     private ResponsiveGrid _responsiveGrid;
+    private bool _isSubscribedToEvents = false; // Variabile per tenere traccia se siamo già iscritti agli eventi, così da evitare di iscriversi più volte e avere un flusso instabile
 
     private void Awake()
     {
@@ -77,7 +78,7 @@ public class InventoryUI : MonoBehaviour
             Debug.LogError("ResponsiveGrid component is missing on SlotContainer.");
             return;
         }
-        _responsiveGrid.SetItemCount(_inventoryManager.MaxNumberOfItems); // Imposto il numero iniziale di item per adattare la griglia
+        _responsiveGrid.SetSlotCount(_inventoryManager.MaxNumberOfItems); // Imposto il numero iniziale di item per adattare la griglia
 
         for (int i = 0; i < _slots.Length; i++)
         {
@@ -89,22 +90,32 @@ public class InventoryUI : MonoBehaviour
         RefreshInventoryUI();
 
     }
+
     private void OnEnable()
     {
-        if (_inventoryManager != null)
-        {
-            _inventoryManager.OnInventoryChanged += RefreshInventoryUI; // Mi iscrivo agli eventi
-            _inventoryManager.OnInventoryFull += ShowFullInventoryMessage;
-        }
+        SubscribeToEvents();
     }
 
     private void OnDisable()
     {
-        if (_inventoryManager != null)
-        {
-            _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; // Mi disiscrivo dagli eventi per evitare memory leak o errori quando l'oggetto viene disabilitato o distrutto
-            _inventoryManager.OnInventoryFull -= ShowFullInventoryMessage;
-        }
+        UnsubscribeFromEvents();
+    }
+
+    private void SubscribeToEvents()
+    {
+        if (_inventoryManager == null || _isSubscribedToEvents) return;
+
+        _inventoryManager.OnInventoryChanged += RefreshInventoryUI; // Mi iscrivo agli eventi
+        _inventoryManager.OnInventoryFull += ShowFullInventoryMessage;
+        _isSubscribedToEvents = true;
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (_inventoryManager == null || !_isSubscribedToEvents) return;
+        _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; // Mi disiscrivo dagli eventi per evitare memory leak o errori quando l'oggetto viene disabilitato o distrutto
+        _inventoryManager.OnInventoryFull -= ShowFullInventoryMessage;
+        _isSubscribedToEvents = false;
     }
 
     private void RefreshInventoryUI()
@@ -133,7 +144,7 @@ public class InventoryUI : MonoBehaviour
 
     }
 
-    private void ClearSlotContainer()
+    private void ClearSlotContainer() //E' una soluzione un pò fragile 
     {
         if (_slotContainer == null) return;
         for (int i = _slotContainer.childCount - 1; i >= 0; i--)
@@ -160,6 +171,11 @@ public class InventoryUI : MonoBehaviour
             return;
         }
         _fullInventoryMessagePanel.gameObject.SetActive(false); // Nascondo il pannello del messaggio di inventario pieno
+    }
+
+    public void OpenIventory()
+    {
+               _inventoryPanel.gameObject.SetActive(true); // Mostro il pannello dell'inventario
     }
 
 }
