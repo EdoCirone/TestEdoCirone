@@ -71,6 +71,7 @@ I pannelli reagiscono agli eventi di gameplay:
 - `OnPlayerDeath`
 
 Il manager si sottoscrive agli eventi e apre il pannello corretto, chiudendo gli altri.
+
 ---
 
 ## Controlli
