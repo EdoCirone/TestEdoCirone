@@ -797,7 +797,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.59400004}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 3.6080055}
+  m_AnchoredPosition: {x: 0, y: 3.6080093}
   m_SizeDelta: {x: -48.138, y: -34.123993}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &251522771
@@ -847,7 +847,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 42.75
+  m_fontSize: 43.05
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -4079,6 +4079,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1610356366}
+  - component: {fileID: 1610356367}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -4101,6 +4102,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1610356367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610356365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6789b5b82f47d5344af11ac33c16d334, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudioManager
+  _inventoryOpenClip: {fileID: 8300000, guid: f7cc4b4c28e7e0746b9d0a14e5e40952, type: 3}
+  _inventoryCloseClip: {fileID: 8300000, guid: ede6b790f25b43f4ca85a3b9bbba30d8, type: 3}
+  _inventoryFullClip: {fileID: 8300000, guid: af5d70e77b860b447b3f39da69864c21, type: 3}
+  _healthFullClip: {fileID: 8300000, guid: 34a9ef5d91e0fba44bf48625b092025f, type: 3}
+  _deathClip: {fileID: 8300000, guid: aa13350a3099da94ea5a3ac7755b770e, type: 3}
+  _pickupClip: {fileID: 8300000, guid: 33304332a1025164e970a33c8a261030, type: 3}
+  _dropClip: {fileID: 8300000, guid: 87996d936d1c5394c81ba015b433a194, type: 3}
+  _swapClip: {fileID: 8300000, guid: 5bfac2973004b6f4ea545dcb3c694a0d, type: 3}
+  _uiAudioSource: {fileID: 1624783888}
+  _gameplayAudioSource: {fileID: 889275797}
 --- !u!1 &1619641311
 GameObject:
   m_ObjectHideFlags: 0
@@ -4463,7 +4486,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 51.15
+  m_fontSize: 51.35
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
