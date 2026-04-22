@@ -54,8 +54,7 @@ Effetti implementati:
 - Chiusura animata
 - Warning inventario pieno su canvas separato
 
-### UI Panels (feedback eventi)
-
+### UI Panels (event-driven feedback)
 Sistema centralizzato per la gestione dei pannelli UI:
 
 - Inventory Full
@@ -117,6 +116,25 @@ Nota: `ExitGame()` funziona solo in build.
   
 ---
 
+### Audio System (event-based)
+
+Sistema audio basato su event bus:
+
+- `AudioEvents` → invio eventi globali
+- `AudioManager` → gestione e riproduzione audio
+
+Due tipi di trigger:
+- AudioCue (enum) per suoni globali (UI, pickup, drop, ecc.)
+- AudioClip diretto per effetti specifici associati agli item (tramite ScriptableObject)
+- 
+Separazione tra:
+- Audio UI (`AudioSource` dedicata)
+- Audio gameplay (`AudioSource` dedicata)
+
+I suoni vengono triggerati in corrispondenza delle azioni (es. apertura inventario, uso item, pickup, ecc.).
+
+---
+
 ## Scelte implementative
 
 ### Inventario non singleton
@@ -161,26 +179,10 @@ Evita problemi di scala e gerarchia UI.
 - No stack item
 - No tipologie avanzate di item
 - Drop richiede raycast valido
+- AudioMixer non implementato (gestione volumi base tramite AudioSource)
 
 ---
-### Audio System (event-based)
 
-Sistema audio basato su event bus:
-
-- `AudioEvents` → invio eventi globali
-- `AudioManager` → gestione e riproduzione audio
-
-Due tipi di trigger:
-- AudioCue (enum) per suoni globali (UI, pickup, drop, ecc.)
-- AudioClip diretto per effetti specifici degli item
-
-Separazione tra:
-- Audio UI (`AudioSource` dedicata)
-- Audio gameplay (`AudioSource` dedicata)
-
-I suoni vengono triggerati in corrispondenza delle azioni (es. apertura inventario, uso item, pickup, ecc.).
-
----
 ## Setup scena
 
 - InventoryManager collegato a PlayerStats
