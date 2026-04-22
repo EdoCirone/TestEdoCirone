@@ -5,25 +5,26 @@ using UnityEngine.EventSystems;
 public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
     [SerializeField] private Image _itemIcon;
+    [SerializeField] private float _iconDropSize = 64f; // Dimensione fissa della preview durante il drag.
 
     private InventoryManager _inventoryManager;
     private RectTransform _inventoryPanel;
-    private Canvas _canvas; //Mi serve per parentare l'icona e farla stare visivamente sopra tutto
-    private int _slotIndex;
-    private PlayerItemDropper _playerItemDropper; //Riferimento al componente che si occupa di droppare gli item nel mondo
-    private static InventorySlotUI _draggedItem; // Variabile STATICA per tenere traccia dell'indice dello slot dell'item attualmente trascinato DA CAMBIARE SE SI VOGLIONO PIU' INVENTARI
-
-    private bool _isDroppedSuccessfully = false;
+    private Canvas _canvas;
+    private PlayerItemDropper _playerItemDropper;
     private Image _iconCopy;
+    private static InventorySlotUI _draggedItem; // Va bene per un solo drag attivo. Da rifare se si gestiscono più inventari contemporaneamente.
+
+    private int _slotIndex;
+    private bool _isDroppedSuccessfully = false;
 
 
 
-    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel, PlayerItemDropper playerItemDropper) //Uso questo metodo perchè il mio inventory non è singleton quindi ho bisogno di passare i riferimenti.
+    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel, PlayerItemDropper playerItemDropper)
     {
         _slotIndex = index;
         _inventoryManager = inventoryManager;
-        _inventoryPanel = inventoryPanel; // passo il riferimento al pannello dell'inventario per poterlo usare come riferimento quando voglio posare a terra degli item
-        _playerItemDropper = playerItemDropper; // passo il riferimento al componente che si occupa di droppare gli item nel mondo per poterlo usare quando voglio posare a terra degli item
+        _inventoryPanel = inventoryPanel;
+        _playerItemDropper = playerItemDropper;
         _canvas = _inventoryPanel.GetComponentInParent<Canvas>();
     }
 
@@ -64,13 +65,19 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             Debug.LogWarning("InventoryManager reference is not assigned in InventorySlotUI.");
             return;
         }
-        _inventoryManager.UseItem(_slotIndex); // Chiamo il metodo UseItem dell'inventory manager passando l'indice dello slot per sapere quale item usare in base alla posizione dello slot nella griglia
+        _inventoryManager.UseItem(_slotIndex);
     }
 
     #region DragAndDrop
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (_canvas == null)
+        {
+            Debug.LogWarning("Canvas reference is missing in InventorySlotUI.");
+            return;
+        }
+
         if (_inventoryManager == null)
         {
             Debug.LogWarning("InventoryManager reference is not assigned in InventorySlotUI.");
@@ -88,19 +95,33 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
+        if (_itemIcon == null || _itemIcon.sprite == null)
+        {
+            Debug.LogWarning("Item icon is missing in InventorySlotUI.");
+            return;
+        }
 
-        _draggedItem = this; // Imposto l'indice dello slot dell'item attualmente trascinato nella variabile statica 
+        _draggedItem = this;
 
 
-        //Instanzio una copia, la parento al _canvas per farla stare sopta a tutto, poi gestisco la scala per tornare alle dimenzioni forzate dal layout e levo il raycast per evitare di droppare su se stessa
-        _iconCopy = Instantiate(_itemIcon, _canvas.transform);
+        // Creo una nuova Image per la preview del drag invece di duplicare quella dello slot,
+        // così evito problemi di dimensione e comportamento ereditati dalla gerarchia UI originale.
+        GameObject dragIconObject = new GameObject("DraggedItemIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        dragIconObject.transform.SetParent(_canvas.transform, false);
 
-        _iconCopy.SetNativeSize();
-        _iconCopy.rectTransform.localScale = _itemIcon.rectTransform.lossyScale * 2; //lossyScale mantiene la scala forzata dal layout, moltiplico per questione di design 
-
+        // Copio solo i dati visivi necessari alla preview del drag.
+        _iconCopy = dragIconObject.GetComponent<Image>();
+        _iconCopy.sprite = _itemIcon.sprite;
+        _iconCopy.color = _itemIcon.color;
+        _iconCopy.preserveAspect = true;
         _iconCopy.raycastTarget = false;
 
-        //Disabilito la vecchia incona poi vedo se riattivarla o eliminarla
+        // Assegno una dimensione fissa alla preview del drag.
+        RectTransform dragRect = _iconCopy.rectTransform;
+        dragRect.sizeDelta = new Vector2(_iconDropSize, _iconDropSize);
+        dragRect.localScale = Vector3.one;
+
+        // Nascondo temporaneamente l'icona originale mentre la preview è attiva.
         _itemIcon.enabled = false;
         _isDroppedSuccessfully = false;
     }
@@ -113,19 +134,19 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
-        _iconCopy.transform.position = eventData.position; // Sposto lo slot seguendo il mouse durante il drag, così da avere un feedback visivo del drag dell'item
+        _iconCopy.transform.position = eventData.position;
     }
 
-    public void OnEndDrag(PointerEventData eventData) // viene chiamato sullo slot di partenza
+    public void OnEndDrag(PointerEventData eventData)
     {
 
         if (_draggedItem != this)
         {
-            Debug.LogWarning("OnEndDrag called on a slot that is not the dragged item. This should not happen."); //Non succederà mai ma metti che...
+            Debug.LogWarning("OnEndDrag called on a slot that is not the dragged item. This should not happen."); 
             return;
         }
 
-        bool releasedInsideInventoryPanel = RectTransformUtility.RectangleContainsScreenPoint(_inventoryPanel, eventData.position, eventData.pressEventCamera); // Controllo se il puntatore è rilasciato all'interno del pannello dell'inventario, così da sapere se posare a terra o riposizionare al punto di partenza
+        bool releasedInsideInventoryPanel = RectTransformUtility.RectangleContainsScreenPoint(_inventoryPanel, eventData.position, eventData.pressEventCamera); 
 
         if (_isDroppedSuccessfully)
         {
@@ -190,7 +211,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
 
         _inventoryManager.MoveOrSwapItems(_draggedItem._slotIndex, _slotIndex);
-        _draggedItem._isDroppedSuccessfully = true; // Imposto la variabile di successo del drop a true, così da sapere che l'item è stato posato con successo e non deve essere riposizionato al punto di partenza nel metodo OnEndDrag dello slot di partenza
+        _draggedItem._isDroppedSuccessfully = true;
 
     }
 
@@ -198,11 +219,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         if (_iconCopy != null)
         {
-            Destroy(_iconCopy.gameObject); // Distruggo la copia dell'icona creata per il drag, così da pulire la scena dopo il drag
+            Destroy(_iconCopy.gameObject);
             _iconCopy = null;
         }
-        _isDroppedSuccessfully = false; // Resetto la variabile di successo del drop a false, così da essere pronto per un nuovo drag
-        _draggedItem = null; // Resetto la variabile statica dell'indice dello slot dell'item attualmente trascinato, così da essere pronto per un nuovo drag
+        _isDroppedSuccessfully = false;
+        _draggedItem = null;
     }
 
     #endregion

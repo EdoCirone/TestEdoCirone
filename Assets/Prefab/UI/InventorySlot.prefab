@@ -258,3 +258,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventorySlotUI
   _itemIcon: {fileID: 8576913016021135611}
+  _iconDropSize: 64

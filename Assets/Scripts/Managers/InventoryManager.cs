@@ -3,29 +3,29 @@ using System.Collections.Generic;
 
 public class InventoryManager : MonoBehaviour
 {
-    // Non serve che sia singleton perchè non è un manager globale, è un componente che gestisce l'inventario di un singolo player,
-    //quindi può essere istanziato più volte se necessario (es. per più player o per NPC con inventari).
-    //Se fosse un manager globale allora si potrebbe considerare di renderlo singleton,
-    //ma in questo caso non è necessario e potrebbe limitare la flessibilità del design.
+    // Gestisce lo stato dell'inventario di una singola entità.
+    // Non è un singleton per scelta: più istanze possono coesistere
+    // per player diversi o NPC con inventari propri.
+
     [Header("Inventory Settings")]
     [SerializeField] private int _maxNumberOfItems = 9;
 
     [Header("References")]
     [SerializeField] private PlayerStats _playerStats;
 
+    // Lista a dimensione fissa dove null rappresenta uno slot vuoto.
+    // Mantenere la dimensione costante semplifica il mapping UI:
+    // l'indice i nella lista corrisponde sempre allo slot i sullo schermo.
     [SerializeField] private List<ItemData> _itemsInInventory = new List<ItemData>();
 
-    public IReadOnlyList<ItemData> ItemsInInventory => _itemsInInventory; //Espongo la lista per la ui con l'interfaccia ReadOnly perchè voglio leggere ma non modificare
+    // Espongo in sola lettura per impedire a codice esterno di bypassare la logica dell'inventario.
+    public IReadOnlyList<ItemData> ItemsInInventory => _itemsInInventory;
 
-    public int MaxNumberOfItems => _maxNumberOfItems; //Espongo il numero massimo di item per generare slot vuoti nella ui
+    public int MaxNumberOfItems => _maxNumberOfItems;
 
     #region events
-
-
-    public event System.Action OnInventoryChanged; //Evento per notificare la UI quando l'inventario cambia, così da aggiornare la visualizzazione degli slot in base agli item presenti nell'inventario
-    public event System.Action OnInventoryFull; //Evento per notificare quando l'inventario è pieno, così da poter mostrare un messaggio o un feedback al giocatore se cerca di aggiungere un item quando l'inventario è già pieno
-
-
+    public event System.Action OnInventoryChanged; 
+    public event System.Action OnInventoryFull; 
     #endregion
 
     private void Awake()
@@ -35,9 +35,10 @@ public class InventoryManager : MonoBehaviour
             Debug.LogWarning("PlayerStats reference is not assigned in InventoryManager.");
         }
 
-        _itemsInInventory.Clear(); // Pulisco la lista per assicurarmi che sia vuota all'inizio
+        _itemsInInventory.Clear();
 
-        for (int i = 0; i < _maxNumberOfItems; i++) // Inizializzo la lista con null per avere sempre una lista con un numero di elementi pari al numero massimo di item, così da poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
+        // Inizializzo con null così la lista ha sempre esattamente _maxNumberOfItems elementi.
+        for (int i = 0; i < _maxNumberOfItems; i++) 
         {
             _itemsInInventory.Add(null);
         }
@@ -51,12 +52,12 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        for (int i = 0; i < _itemsInInventory.Count; i++) // Cerco un slot vuoto (null) per aggiungere l'item, così da mantenere la dimensione della lista sempre pari al numero massimo di item e poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
+        for (int i = 0; i < _itemsInInventory.Count; i++) 
         {
             if (_itemsInInventory[i] == null)
             {
                 _itemsInInventory[i] = item;
-                OnInventoryChanged?.Invoke(); // Notifico la UI che l'inventario è cambiato
+                OnInventoryChanged?.Invoke(); 
                 return true;
 
             }
@@ -64,7 +65,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         Debug.LogWarning("Inventory is full!");
-        OnInventoryFull?.Invoke(); // Notifico che l'inventario è pieno, così da poter mostrare un messaggio o un feedback al giocatore se cerca di aggiungere un item quando l'inventario è già pieno
+        OnInventoryFull?.Invoke(); 
         return false;
 
     }
@@ -76,7 +77,10 @@ public class InventoryManager : MonoBehaviour
             Debug.LogWarning("Invalid item index.");
             return;
         }
-        _itemsInInventory[index] = null; // Imposto l'elemento a null invece di rimuoverlo dalla lista, così da mantenere la dimensione della lista sempre pari al numero massimo di item e poter gestire dinamicamente gli slot in base al numero di item presenti nell'inventario (slot vuoti se null, slot pieni se non null)
+
+        // Imposto null invece di rimuovere l'elemento così gli indici degli slot rimangono stabili.
+        _itemsInInventory[index] = null; 
+
         OnInventoryChanged?.Invoke();
     }
 
@@ -95,11 +99,12 @@ public class InventoryManager : MonoBehaviour
 
         if (_itemsInInventory[fromIndex] == null)
         {
-            Debug.LogWarning("Source slots is empty.");
+            Debug.LogWarning("Source slot is empty.");
             return;
         }
 
-        ItemData temp = _itemsInInventory[fromIndex]; // Salvo temporaneamente l'item da spostare o scambiare per evitare di perderlo durante l'operazione
+        // Lo swap funziona sia per spostamento in slot vuoto che per scambio con slot occupato.
+        ItemData temp = _itemsInInventory[fromIndex]; 
 
         _itemsInInventory[fromIndex] = _itemsInInventory[toIndex];
         _itemsInInventory[toIndex] = temp;
@@ -143,7 +148,7 @@ public class InventoryManager : MonoBehaviour
         RemoveItem(index);
     }
 
-    #region DEBUG METODS
+    #region DEBUG METHODS
 
     [ContextMenu("Use Test Item")]
     private void UseFirstItemForDebug()

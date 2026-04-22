@@ -45,11 +45,11 @@ public class ResponsiveGrid : MonoBehaviour
         if (_gridLayoutGroup == null || _containerRectTransform == null)
             return;
         
-        int numberOfColumns = Mathf.Max(1,_gridLayoutGroup.constraintCount); // Prendo il numero di colonne dal GridLayoutGroup, assicurandomi che sia almeno 1
-        int numberOfRows = Mathf.CeilToInt((float)_slotCount / numberOfColumns); // Calcolo il numero di righe necessario in base al numero di item e colonne
+        int numberOfColumns = Mathf.Max(1,_gridLayoutGroup.constraintCount); 
+        int numberOfRows = Mathf.CeilToInt((float)_slotCount / numberOfColumns); 
 
-        float paddingX = _gridLayoutGroup.padding.left + _gridLayoutGroup.padding.right + _gridLayoutGroup.spacing.x * (numberOfColumns - 1); //Calcolo del padding totale in orizzontale
-        float paddingY = _gridLayoutGroup.padding.top + _gridLayoutGroup.padding.bottom + _gridLayoutGroup.spacing.y * (numberOfRows - 1); // Calcolo del padding totale in verticale
+        float paddingX = _gridLayoutGroup.padding.left + _gridLayoutGroup.padding.right + _gridLayoutGroup.spacing.x * (numberOfColumns - 1); 
+        float paddingY = _gridLayoutGroup.padding.top + _gridLayoutGroup.padding.bottom + _gridLayoutGroup.spacing.y * (numberOfRows - 1); 
         
         float cellWidth = (_containerRectTransform.rect.width - paddingX) / numberOfColumns; 
         float cellHeight = (_containerRectTransform.rect.height - paddingY) / numberOfRows; 

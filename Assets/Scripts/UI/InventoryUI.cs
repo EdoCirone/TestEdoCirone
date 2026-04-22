@@ -14,7 +14,10 @@ public class InventoryUI : MonoBehaviour
 
     private InventorySlotUI[] _slots;
     private ResponsiveGrid _responsiveGrid;
-    private bool _isSubscribedToEvents = false; // Variabile per tenere traccia se siamo già iscritti agli eventi, così da evitare di iscriversi più volte e avere un flusso instabile
+
+    // Traccia lo stato di iscrizione agli eventi per evitare doppie iscrizioni
+    private bool _isSubscribedToEvents = false; 
+
 
     private void Awake()
     {
@@ -38,9 +41,9 @@ public class InventoryUI : MonoBehaviour
 
         ClearSlotContainer();
 
-        for (int i = 0; i < _inventoryManager.MaxNumberOfItems; i++) // Creo dinamicamente gli slot in base al numero massimo di item nell'inventario, così da poterli gestire dinamicamente in base al numero di item nell'inventario
+        for (int i = 0; i < _inventoryManager.MaxNumberOfItems; i++) 
         {
-            GameObject slot = Instantiate(_slotPrefab, _slotContainer); // Instanzio lo slot prefab come figlio del container
+            GameObject slot = Instantiate(_slotPrefab, _slotContainer); 
             if (slot == null)
             {
                 Debug.LogError("Failed to instantiate slot prefab.");
@@ -48,7 +51,7 @@ public class InventoryUI : MonoBehaviour
             }
         }
 
-        _responsiveGrid = _slotContainer.GetComponent<ResponsiveGrid>(); // Prendo il componente ResponsiveGrid dal container per poter aggiornare la griglia dinamicamente in base al numero di item nell'inventario
+        _responsiveGrid = _slotContainer.GetComponent<ResponsiveGrid>(); 
 
         if (_responsiveGrid == null)
         {
@@ -57,7 +60,7 @@ public class InventoryUI : MonoBehaviour
         }
 
 
-        _slots = _slotContainer.GetComponentsInChildren<InventorySlotUI>(true); // Prendo tutti gli slot come componenti figli del container, così da poterli gestire dinamicamente in base al numero di item nell'inventario
+        _slots = _slotContainer.GetComponentsInChildren<InventorySlotUI>(true); 
 
     }
 
@@ -78,15 +81,16 @@ public class InventoryUI : MonoBehaviour
             Debug.LogError("ResponsiveGrid component is missing on SlotContainer.");
             return;
         }
-        _responsiveGrid.SetSlotCount(_inventoryManager.MaxNumberOfItems); // Imposto il numero iniziale di item per adattare la griglia
+        _responsiveGrid.SetSlotCount(_inventoryManager.MaxNumberOfItems); 
 
         for (int i = 0; i < _slots.Length; i++)
         {
-            if (_slots[i] == null) continue; // Salto slot nulli per evitare errori
+            if (_slots[i] == null) continue;
 
-            _slots[i].Initialize(_inventoryManager, i, _inventoryPanel, _playerItemDropper); // Inizializzo ogni slot passando l'indice e il riferimento all'inventario per poter gestire l'uso degli item al click dello slot
+            _slots[i].Initialize(_inventoryManager, i, _inventoryPanel, _playerItemDropper); 
         }
 
+        HideFullInventoryMessage();
         RefreshInventoryUI();
 
     }
@@ -105,7 +109,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (_inventoryManager == null || _isSubscribedToEvents) return;
 
-        _inventoryManager.OnInventoryChanged += RefreshInventoryUI; // Mi iscrivo agli eventi
+        _inventoryManager.OnInventoryChanged += RefreshInventoryUI; 
         _inventoryManager.OnInventoryFull += ShowFullInventoryMessage;
         _isSubscribedToEvents = true;
     }
@@ -113,7 +117,7 @@ public class InventoryUI : MonoBehaviour
     private void UnsubscribeFromEvents()
     {
         if (_inventoryManager == null || !_isSubscribedToEvents) return;
-        _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; // Mi disiscrivo dagli eventi per evitare memory leak o errori quando l'oggetto viene disabilitato o distrutto
+        _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; 
         _inventoryManager.OnInventoryFull -= ShowFullInventoryMessage;
         _isSubscribedToEvents = false;
     }
@@ -124,32 +128,30 @@ public class InventoryUI : MonoBehaviour
         if (_inventoryManager == null || _slots == null)
             return;
 
-        var items = _inventoryManager.ItemsInInventory; // Prendo la lista degli item attualmente nell'inventario
+        var items = _inventoryManager.ItemsInInventory; 
 
         for (int i = 0; i < _slots.Length; i++)
         {
-            if (_slots[i] == null) continue; // Salto slot nulli per evitare errori
+            if (_slots[i] == null) continue;
 
             if (i < items.Count && items[i] != null)
             {
-                _slots[i].SetItem(items[i]); // Se c'è un item corrispondente all'indice dello slot, lo setto nello slot
+                _slots[i].SetItem(items[i]); 
             }
             else
             {
-                _slots[i].ClearSlot(); // Altrimenti pulisco lo slot per mostrare che è vuoto
+                _slots[i].ClearSlot(); 
             }
         }
 
-        if (_fullInventoryMessagePanel != null) HideFullInventoryMessage();
-
     }
 
-    private void ClearSlotContainer() //E' una soluzione un pò fragile 
+    private void ClearSlotContainer() 
     {
         if (_slotContainer == null) return;
         for (int i = _slotContainer.childCount - 1; i >= 0; i--)
         {
-            Destroy(_slotContainer.GetChild(i).gameObject); // Distruggo tutti i figli del container per pulire la griglia prima di creare nuovi slot
+            Destroy(_slotContainer.GetChild(i).gameObject); 
         }
     }
 
@@ -160,22 +162,20 @@ public class InventoryUI : MonoBehaviour
             Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
             return;
         }
-        _fullInventoryMessagePanel.gameObject.SetActive(true); // Mostro il pannello del messaggio di inventario pieno
+        _fullInventoryMessagePanel.gameObject.SetActive(true); 
+
     }
 
-    private void HideFullInventoryMessage()
+    public void HideFullInventoryMessage()
     {
         if (_fullInventoryMessagePanel == null)
         {
             Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
             return;
         }
-        _fullInventoryMessagePanel.gameObject.SetActive(false); // Nascondo il pannello del messaggio di inventario pieno
-    }
 
-    public void OpenIventory()
-    {
-               _inventoryPanel.gameObject.SetActive(true); // Mostro il pannello dell'inventario
+        _fullInventoryMessagePanel.gameObject.SetActive(false); 
+
     }
 
 }

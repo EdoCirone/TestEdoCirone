@@ -24,7 +24,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Start()
     {
-        _currentHealth = _maxHealth * 0.5f; //Inizializzo a metà per gestire i test di Healt e Damage
+        _currentHealth = _maxHealth * 0.5f;// Inizializzo la vita a metà per testare subito sia cura sia danno.
         OnHealthChanged?.Invoke();
         OnStatsChanged?.Invoke();
     }
