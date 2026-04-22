@@ -8,9 +8,16 @@ public class PlayerItemCollector : MonoBehaviour
 
     public void TryPickItem(ItemPickerControl itemPickerControl)
     {
+
         if (_inventoryManager == null)
         {
             Debug.LogWarning("InventoryManager reference is null in PlayerItemCollector.");
+            return;
+        }
+
+        if (_inventoryManager.PlayerStats.IsDead)
+        {
+            Debug.LogWarning("Player is dead. Cannot pick up items.");
             return;
         }
 
@@ -33,7 +40,7 @@ public class PlayerItemCollector : MonoBehaviour
         {
             AudioEvents.RaiseAudioCue(AudioCueType.Pickup);
             OnItemCollected?.Invoke();
-            itemPickerControl.Pick(); 
+            itemPickerControl.Pick();
         }
     }
 

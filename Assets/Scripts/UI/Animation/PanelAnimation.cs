@@ -35,7 +35,7 @@ public class PanelAnimation : MonoBehaviour
         this.gameObject.SetActive(true);
         this.transform.localScale = Vector3.zero;
 
-        _openAnimSeq = DOTween.Sequence();
+        _openAnimSeq = DOTween.Sequence().SetUpdate(true);
         _openAnimSeq.Append(this.transform.DOScale(_finalScale, _animationDuration).SetEase(Ease.OutBack))
             .Join(_canvasGroup.DOFade(1, _animationDuration).SetEase(Ease.OutQuad))
             .OnComplete(() => _canvasGroup.blocksRaycasts = true);

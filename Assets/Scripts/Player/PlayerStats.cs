@@ -14,6 +14,7 @@ public class PlayerStats : MonoBehaviour
     public float Speed => _speed;
     public float Strength => _strength;
     public float CurrentHealth => _currentHealth;
+    public bool IsDead => _currentHealth <= 0f;
 
     #region Events
 

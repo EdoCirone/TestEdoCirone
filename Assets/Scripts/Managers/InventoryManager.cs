@@ -23,6 +23,8 @@ public class InventoryManager : MonoBehaviour
 
     public int MaxNumberOfItems => _maxNumberOfItems;
 
+    public PlayerStats PlayerStats => _playerStats;
+
     #region Events
     public event System.Action OnInventoryChanged;
     public event System.Action OnInventoryFull;

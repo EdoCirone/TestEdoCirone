@@ -51,6 +51,7 @@ public class UIPanelManager : MonoBehaviour
         if (_deathPanel == null) return;
         CloseAllPanels();
         _deathPanel.Open();
+        Time.timeScale = 0f;// Metto in pausa il gioco quando il pannello di morte è aperto. Il pannello di morte ha un pulsante per riavviare il livello che ripristina il timeScale a 1.
     }
 
     public void CloseAllPanels()
