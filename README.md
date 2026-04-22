@@ -54,6 +54,24 @@ Effetti implementati:
 - Chiusura animata
 - Warning inventario pieno su canvas separato
 
+### UI Panels (feedback eventi)
+
+Sistema centralizzato per la gestione dei pannelli UI:
+
+- Inventory Full
+- Health Full
+- Death
+
+Gestiti tramite:
+- `UIPanelManager`
+- `PanelAnimation`
+
+I pannelli reagiscono agli eventi di gameplay:
+- `OnInventoryFull`
+- `OnHealthAlreadyFull`
+- `OnPlayerDeath`
+
+Il manager si sottoscrive agli eventi e apre il pannello corretto, chiudendo gli altri.
 ---
 
 ## Controlli
@@ -96,7 +114,7 @@ Nota: `ExitGame()` funziona solo in build.
 - **HUDManager** → aggiornamento HUD
 - **ResponsiveGrid** → layout dinamico
 - **InventoryAnimation** → animazioni
-
+  
 ---
 
 ## Scelte implementative
@@ -145,7 +163,24 @@ Evita problemi di scala e gerarchia UI.
 - Drop richiede raycast valido
 
 ---
+### Audio System (event-based)
 
+Sistema audio basato su event bus:
+
+- `AudioEvents` → invio eventi globali
+- `AudioManager` → gestione e riproduzione audio
+
+Due tipi di trigger:
+- AudioCue (enum) per suoni globali (UI, pickup, drop, ecc.)
+- AudioClip diretto per effetti specifici degli item
+
+Separazione tra:
+- Audio UI (`AudioSource` dedicata)
+- Audio gameplay (`AudioSource` dedicata)
+
+I suoni vengono triggerati in corrispondenza delle azioni (es. apertura inventario, uso item, pickup, ecc.).
+
+---
 ## Setup scena
 
 - InventoryManager collegato a PlayerStats
