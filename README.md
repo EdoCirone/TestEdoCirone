@@ -58,8 +58,8 @@ Effetti implementati:
 Sistema centralizzato per la gestione dei pannelli UI:
 
 - Inventory Full
-- Health Full
-- Death
+- Health Already Full
+- Player Death
 
 Gestiti tramite:
 - `UIPanelManager`
@@ -126,7 +126,7 @@ Sistema audio basato su event bus:
 Due tipi di trigger:
 - AudioCue (enum) per suoni globali (UI, pickup, drop, ecc.)
 - AudioClip diretto per effetti specifici associati agli item (tramite ScriptableObject)
-- 
+  
 Separazione tra:
 - Audio UI (`AudioSource` dedicata)
 - Audio gameplay (`AudioSource` dedicata)
