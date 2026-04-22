@@ -65,7 +65,7 @@ Gestiti tramite:
 - `UIPanelManager`
 - `PanelAnimation`
 
-I pannelli reagiscono agli eventi di gameplay:
+I pannelli reagiscono a eventi di gameplay esposti dai sistemi core:
 - `OnInventoryFull`
 - `OnHealthAlreadyFull`
 - `OnPlayerDeath`
