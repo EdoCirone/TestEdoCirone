@@ -1,233 +1,210 @@
+# Inventory System Test
 
-## README
-## Inventory System Test
+Sistema inventario realizzato in Unity con:
 
-## Sistema inventario realizzato in Unity con:
+- raccolta oggetti dal mondo
+- visualizzazione a slot fissi
+- utilizzo item con effetti diversi
+- drag and drop tra slot
+- drop degli oggetti nel mondo
+- HUD aggiornato tramite eventi
+- animazione di apertura/chiusura inventario
+- warning UI per inventario pieno
 
-raccolta oggetti dal mondo
-visualizzazione a slot fissi
-utilizzo item con effetti diversi
-drag and drop tra slot
-drop degli oggetti nel mondo
-HUD aggiornato tramite eventi
-animazione di apertura/chiusura inventario
-warning UI per inventario pieno
-Funzionalità implementate
-Inventario
-Inventario a capacità fissa.
-Gli slot vuoti sono rappresentati con null, così la UI mantiene un mapping stabile tra indice logico e slot visivo.
-Aggiunta item al primo slot libero disponibile.
-Rimozione item mantenendo invariata la dimensione della lista.
-Spostamento o scambio item tra slot.
-Raccolta item
-Gli oggetti nel mondo possono essere raccolti cliccandoli.
-Per semplicità di prototipazione la raccolta usa OnMouseDown() su ItemPickerControl.
-Se l’inventario è pieno, l’oggetto non viene raccolto e viene mostrato un warning UI.
+---
 
-# Uso item
+## Funzionalità implementate
 
-Gli item usano ScriptableObject per definire l’effetto applicato al player.
-Sono stati implementati quattro effetti:
+### Inventario
+- Inventario a capacità fissa
+- Slot vuoti rappresentati con `null` per mantenere mapping stabile tra indice e UI
+- Aggiunta item al primo slot libero disponibile
+- Rimozione item senza modificare la dimensione della lista
+- Spostamento e scambio item tra slot
 
-Heal
-Damage
-Speed
-Strength
+### Raccolta item
+- Raccolta tramite click sugli oggetti nel mondo
+- Uso di `OnMouseDown()` su `ItemPickerControl` (soluzione di prototipo)
+- Se inventario pieno, item non raccolto e viene mostrato un warning UI
 
-# Drag and drop
-Drag di item tra slot.
-Swap automatico se il target è occupato.
-Se il drag termina fuori dal pannello inventario, l’item viene droppato nel mondo.
-La preview dell’icona durante il drag viene creata a runtime come nuova Image UI dedicata.
+### Uso item
+Gli item usano `ScriptableObject` per definire l’effetto sul player.
 
-# HUD
-Barra salute
-Testo statistiche player
-Aggiornamento reattivo tramite eventi (OnHealthChanged, OnStatsChanged)
+Effetti implementati:
+- Heal
+- Damage
+- Speed
+- Strength
 
-# UI e animazioni
-Apertura inventario con animazione del pannello.
-Comparsa scalata del titolo.
-Apparizione a cascata degli slot.
-Chiusura animata dell’inventario.
-Warning per inventario pieno su canvas dedicato con sorting superiore rispetto alla UI principale.
+### Drag and drop
+- Drag tra slot
+- Swap automatico se il target è occupato
+- Drop nel mondo se rilasciato fuori dal pannello inventario
+- Preview icona creata a runtime con `Image` separata
 
-# Controlli
-Click sinistro su item nel mondo → raccoglie l’oggetto
-Click su slot occupato → usa l’item
-Tasto I → apre / chiude inventario
-Drag su uno slot occupato
-sopra un altro slot → move/swap
-fuori dal pannello inventario → drop nel mondo
-Click fuori dal warning panel → chiude il warning di inventario pieno
-Restart button → ricarica la scena corrente
+### HUD
+- Barra salute
+- Testo statistiche
+- Aggiornamento tramite eventi (`OnHealthChanged`, `OnStatsChanged`)
 
-Nota: ExitGame() è utile solo in build, non in Play Mode nell’editor.
+### UI e animazioni
+- Apertura pannello inventario animata
+- Comparsa titolo
+- Apparizione slot in cascata
+- Chiusura animata
+- Warning inventario pieno su canvas separato
+
+---
+
+## Controlli
+
+- Click sinistro su item → raccoglie
+- Click su slot → usa item
+- Tasto `I` → apre/chiude inventario
+
+Drag:
+- su altro slot → move/swap
+- fuori inventario → drop nel mondo
+
+- Click fuori dal warning → chiude warning
+- Restart button → ricarica scena
+
+Nota: `ExitGame()` funziona solo in build.
+
+---
 
 ## Architettura
 
-## Manager e logica
-# InventoryManager
-Gestisce lo stato dell’inventario, gli slot, l’uso item, gli eventi UI e le operazioni di move/swap.
-# PlayerStats
-Gestisce salute e statistiche modificabili dagli item.
-# GameManager
-Contiene utility semplici di scena (RestartLevel, ExitGame).
+### Manager e logica
+- **InventoryManager** → gestione inventario
+- **PlayerStats** → salute e statistiche
+- **GameManager** → gestione scena
 
-## Item e dati
-# ItemData
-Dati base di un item: nome, icona, prefab, descrizione, amount, effect.
-# AbstractEffectData
-Classe base ScriptableObject per gli effetti item.
-HealEffectData, DamageEffectData, SpeedEffectData, StrengthEffectData
-Implementazioni concrete degli effetti applicabili.
+### Item e dati
+- **ItemData** → dati item
+- **AbstractEffectData** → base effetti
+- **Heal / Damage / Speed / Strength** → implementazioni
 
-## Interazione mondo
-# ItemPickerControl
-Rappresenta un item nel mondo e fornisce il dato ItemData da raccogliere.
-# PlayerItemCollector
-Tenta di aggiungere l’item all’inventario.
-# PlayerItemDropper
-Gestisce il drop nel mondo tramite raycast da posizione schermo.
+### Interazione mondo
+- **ItemPickerControl** → rappresenta item nel mondo
+- **PlayerItemCollector** → raccolta item
+- **PlayerItemDropper** → drop nel mondo
 
-## UI
-# InventoryUI
-Genera dinamicamente gli slot, inizializza la UI e si sottoscrive agli eventi dell’inventario.
-# InventorySlotUI
-Gestisce visualizzazione, click sullo slot, drag and drop e preview dell’icona trascinata.
-# HUDManager
-Aggiorna salute e stats in UI.
-# ResponsiveGrid
-Calcola automaticamente la dimensione quadrata delle celle in base allo spazio disponibile.
-# InventoryAnimation
-Gestisce apertura e chiusura animata del pannello inventario.
+### UI
+- **InventoryUI** → gestione UI inventario
+- **InventorySlotUI** → slot + drag & drop
+- **HUDManager** → aggiornamento HUD
+- **ResponsiveGrid** → layout dinamico
+- **InventoryAnimation** → animazioni
 
-## Scelte implementative principali
-# Inventario non singleton
+---
 
-InventoryManager non è stato implementato come singleton, perché la logica è pensata per essere riutilizzabile da più attori se necessario.
+## Scelte implementative
 
-# Slot fissi con null
+### Inventario non singleton
+Permette più inventari (player, NPC, ecc).
 
-La lista interna dell’inventario mantiene sempre dimensione costante.
-Gli slot vuoti sono rappresentati con null, così:
+### Slot fissi con `null`
+- mapping diretto con UI
+- griglia stabile
+- logica semplificata
 
-la UI può mappare direttamente gli indici
-la griglia resta stabile
-move/swap e refresh diventano più semplici
+### Effetti con ScriptableObject
+Aggiungere un effetto non richiede modifiche al sistema esistente.
 
-# Effetti tramite ScriptableObject
+### Drag preview separata
+Evita problemi di scala e gerarchia UI.
 
-Gli effetti degli item sono separati dai dati item e dalla logica dell’inventario.
-Per aggiungere un nuovo effetto basta creare una nuova sottoclasse di AbstractEffectData.
+---
 
-# Drag preview separata
+## Problemi e soluzioni
 
-La preview dell’icona durante il drag non viene più ottenuta duplicando direttamente la Image originale dello slot, ma creando una nuova Image dedicata a runtime.
+### 1. Preview drag scalata male
+**Soluzione:** creata nuova `Image` dedicata.
 
-## Problemi incontrati durante il test e soluzioni adottate
-1. Preview dell’icona durante il drag con scala errata
+### 2. Warning non sopra la UI
+**Soluzione:** canvas separato con sorting più alto.
 
-Problema:
-La preview dell’icona trascinata aveva dimensioni incoerenti quando veniva duplicata direttamente la Image dello slot e reparentata sotto il Canvas.
+### 3. Chiusura warning
+**Soluzione:** area cliccabile (`CloseArea`).
 
-Causa:
-L’elemento UI duplicato ereditava proprietà di dimensione e trasformazione non adatte a una preview libera fuori dalla gerarchia originale dello slot.
+### 4. HUD aggiornato ogni frame
+**Soluzione:** uso eventi.
 
-Soluzione:
-È stata creata una nuova Image a runtime dedicata esclusivamente alla preview del drag, copiando solo sprite e proprietà visive essenziali e assegnando una dimensione fissa al RectTransform.
+### 5. Animazioni poco leggibili
+**Soluzione:** sequenza DOTween strutturata.
 
-2. Warning panel non visibile sopra tutta la UI
-
-Problema:
-Il warning di inventario pieno non risultava sempre sopra agli altri elementi UI.
-
-Soluzione:
-È stato spostato su un canvas dedicato (WarningPanels) con Sort Order superiore rispetto alla UI principale.
-
-3. Chiusura del warning al click
-
-Problema:
-Gestire la chiusura del warning tramite controllo input nello script era fragile.
-
-Soluzione:
-È stato usato un CloseArea UI cliccabile dietro al popup, così il warning si chiude con un click fuori dal pannello.
-
-4. HUD aggiornato in polling continuo
-
-Problema:
-L’HUD veniva aggiornato ogni frame, anche quando i valori non cambiavano.
-
-Soluzione:
-PlayerStats espone eventi (OnHealthChanged, OnStatsChanged) e HUDManager si sottoscrive a questi eventi per aggiornare la UI solo quando serve.
-
-5. Sequenza animazioni inventario
-
-Problema:
-L’apertura dell’inventario risultava poco leggibile quando title e slot comparivano tutti insieme.
-
-Soluzione:
-L’animazione è stata organizzata con DOTween Sequence:
-
-pannello
-titolo
-comparsa slot in cascata con overlap temporale controllato
+---
 
 ## Limiti attuali
-La raccolta nel mondo usa OnMouseDown() come soluzione di prototipo. In un progetto più strutturato sarebbe meglio usare un sistema di interazione dedicato.
-La UI di drag and drop usa una reference statica (_draggedItem) per tracciare lo slot attualmente trascinato. Va bene per questo test, ma andrebbe rifatta nel caso di più inventari UI contemporanei.
-Il sistema non supporta stack di item.
-Il sistema non distingue ancora tra tipi di item più complessi (equipaggiabili, stackabili, consumabili non distruttivi, ecc.).
-Il drop nel mondo richiede una superficie colpibile da raycast e una Main Camera valida.
-Setup scena richiesto
 
-## Per il corretto funzionamento servono:
+- Raccolta con `OnMouseDown()` (prototipo)
+- Drag usa reference statica (non scalabile)
+- No stack item
+- No tipologie avanzate di item
+- Drop richiede raycast valido
 
-InventoryManager con riferimento a PlayerStats
-Player con:
-PlayerStats
-PlayerItemCollector
-PlayerItemDropper
-UIManager con:
-HUDManager
-InventoryUI
-InventoryAnimation
-InventorySlotGrid con ResponsiveGrid
-WarningPanels su canvas dedicato
-EventSystem
-Main Camera
-Collider sulle superfici su cui è possibile droppare oggetti
-Prefab item assegnati nei rispettivi ItemData
-Struttura asset e script
-Script
-Scripts/Managers
-Scripts/Player
-Scripts/UI
-Scripts/Data / Scripts/ScriptableObjects se si vuole rifinire ulteriormente la nomenclatura
-Dati
-Data/Items
-Data/Effects
-Prefab
-Prefabs/Items
-Prefabs/UI
-Possibili estensioni future
-inventari multipli (player / chest / NPC)
-item stackabili
-tooltip item
-filtro/ordinamento inventario
-sistema input centralizzato
-interazione mondo più robusta
-feedback audio sulle azioni UI
-animazione warning panel
-Build testata
+---
 
-## Sistema verificato in editor e in build Windows con:
+## Setup scena
 
-raccolta item
-warning inventario pieno
-uso item
-drag and drop tra slot
-drop fuori pannello
-aggiornamento HUD
-apertura/chiusura inventario
-restart scena
+- InventoryManager collegato a PlayerStats
+- Player con:
+  - PlayerStats
+  - PlayerItemCollector
+  - PlayerItemDropper
+- UIManager con:
+  - HUDManager
+  - InventoryUI
+  - InventoryAnimation
+- Grid con ResponsiveGrid
+- WarningPanels su canvas separato
+- EventSystem
+- Main Camera
+- Collider nel mondo
+- Prefab assegnati agli ItemData
+
+---
+
+## Struttura progetto
+
+### Script
+- Scripts/Managers
+- Scripts/Player
+- Scripts/UI
+
+### Dati
+- Data/Items
+- Data/Effects
+
+### Prefab
+- Prefabs/Items
+- Prefabs/UI
+
+---
+
+## Estensioni future
+
+- inventari multipli
+- stack item
+- tooltip
+- ordinamento
+- input system centralizzato
+- miglior interazione mondo
+- audio feedback
+- animazioni UI aggiuntive
+
+---
+
+## Build testata
+
+Testato in editor e build Windows con:
+
+- raccolta item
+- warning inventario pieno
+- uso item
+- drag and drop
+- drop nel mondo
+- aggiornamento HUD
+- apertura/chiusura inventario
+- restart scena
