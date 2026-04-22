@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0986fc7afffa3fe47ad8e964ccb2fb61, type: 3}
   m_Name: DamageEffectData
   m_EditorClassIdentifier: Assembly-CSharp::DamageEffectData
+  _audioClip: {fileID: 8300000, guid: c36aed88066ca1d47986b15b3a2f503b, type: 3}

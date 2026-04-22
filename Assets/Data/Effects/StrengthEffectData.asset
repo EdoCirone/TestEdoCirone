@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f0e8c4cbf873f343aa68b481249210d, type: 3}
   m_Name: StrengthEffectData
   m_EditorClassIdentifier: Assembly-CSharp::StrengthEffectData
+  _audioClip: {fileID: 8300000, guid: b5facd6ba3142e947a286ef60309c763, type: 3}

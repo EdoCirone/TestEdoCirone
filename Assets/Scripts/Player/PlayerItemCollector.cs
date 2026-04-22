@@ -4,6 +4,8 @@ public class PlayerItemCollector : MonoBehaviour
 {
     [SerializeField] private InventoryManager _inventoryManager;
 
+    public event System.Action OnItemCollected;
+
     public void TryPickItem(ItemPickerControl itemPickerControl)
     {
         if (_inventoryManager == null)
@@ -28,9 +30,10 @@ public class PlayerItemCollector : MonoBehaviour
 
         bool added = _inventoryManager.AddItem(item);
         if (added)
-
         {
-            itemPickerControl.Pick(); // Distrugge l'oggetto nella scena solo se l'item è stato aggiunto con successo all'inventario, altrimenti rimane nella scena per poter essere raccolto da un altro player o in un secondo momento
+            AudioEvents.RaiseAudioCue(AudioCueType.Pickup);
+            OnItemCollected?.Invoke();
+            itemPickerControl.Pick(); 
         }
     }
 

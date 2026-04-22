@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 798894f9c93a7c84190b051a6f0f622b, type: 3}
   m_Name: SpeedEffectData
   m_EditorClassIdentifier: Assembly-CSharp::SpeedEffectData
+  _audioClip: {fileID: 8300000, guid: 56840c6ed3f98504598055217464caf3, type: 3}

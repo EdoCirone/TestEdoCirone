@@ -4,10 +4,11 @@ using UnityEngine;
 public class DamageEffectData : AbstractEffectData
 {
 
-    public override void ApplyEffect(PlayerStats playerStats, float amount)
+    public override bool ApplyEffect(PlayerStats playerStats, float amount)
     {
-        if (playerStats == null) return;
+        if (playerStats == null) return false;
 
         playerStats.TakeDamage(amount);
+        return true;
     }
 }

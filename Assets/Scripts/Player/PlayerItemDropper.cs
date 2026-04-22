@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerItemDropper : MonoBehaviour
 {
+    public event System.Action OnItemDroppedOutside; 
 
     public bool TryDropItemOutside(ItemData item, Vector2 position)
     {
@@ -27,11 +28,14 @@ public class PlayerItemDropper : MonoBehaviour
 
         Ray ray = camera.ScreenPointToRay(position);
 
-        if(Physics.Raycast(ray, out RaycastHit hitInfo)) // Faccio un raycast per trovare il punto nel mondo dove droppare l'item, così da posizionarlo correttamente a terra o su una superficie
+        if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
-            Vector3 dropPosition = hitInfo.point; // Prendo il punto di impatto del raycast come posizione di drop dell'item
-            Instantiate(item.Prefab, dropPosition, Quaternion.identity); // Instanzio il prefab dell'item nella posizione di drop con rotazione identità (puoi modificare la rotazione se necessario)
-            Debug.Log("Dropped item: " + item.ItemName + " at position: " + dropPosition);
+            Vector3 dropPosition = hitInfo.point;
+            Instantiate(item.Prefab, dropPosition, Quaternion.identity);
+
+            OnItemDroppedOutside?.Invoke();
+            AudioEvents.RaiseAudioCue(AudioCueType.Drop);
+
             return true;
         }
         else

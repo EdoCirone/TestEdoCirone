@@ -15,10 +15,12 @@ public class PlayerStats : MonoBehaviour
     public float Strength => _strength;
     public float CurrentHealth => _currentHealth;
 
-    #region events
+    #region Events
 
     public event System.Action OnHealthChanged;
     public event System.Action OnStatsChanged;
+    public event System.Action OnPlayerDeath;
+    public event System.Action OnHealthAlreadyFull;
 
     #endregion
 
@@ -29,10 +31,17 @@ public class PlayerStats : MonoBehaviour
         OnStatsChanged?.Invoke();
     }
 
-    public void Heal(float amount)
+    public bool TryHeal(float amount)
     {
+        if (_currentHealth >= _maxHealth)
+        {
+            OnHealthAlreadyFull?.Invoke();
+            AudioEvents.RaiseAudioCue(AudioCueType.HealthFull);
+            return false;
+        }
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _maxHealth);
         OnHealthChanged?.Invoke();
+        return true;
 
     }
 
@@ -40,6 +49,12 @@ public class PlayerStats : MonoBehaviour
     {
         _currentHealth = Mathf.Clamp(_currentHealth - amount, 0, _maxHealth);
         OnHealthChanged?.Invoke();
+
+        if (_currentHealth <= 0f)
+        {
+            OnPlayerDeath?.Invoke();
+            AudioEvents.RaiseAudioCue(AudioCueType.Death);
+        }
     }
 
     public void UpdateSpeed(float amount)

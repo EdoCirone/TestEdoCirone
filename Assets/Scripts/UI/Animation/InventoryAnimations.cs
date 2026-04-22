@@ -23,6 +23,12 @@ public class InventoryAnimation : MonoBehaviour
     private Sequence _closeInventoryAnimSequence;
     private bool _isInventoryOpen;
 
+    #region Events
+
+    public event System.Action OnInventoryOpened;
+    public event System.Action OnInventoryClosed;
+
+    #endregion
 
     private void Awake()
     {
@@ -82,6 +88,9 @@ public class InventoryAnimation : MonoBehaviour
         _openInventoryAnimSequence?.Kill();
 
         ResetOpenVisualState();
+        //L'audio parte prima dell'animazione e non a OnComplete perché voglio che il suono sia sincronizzato con l'inizio dell'animazione, non con la fine.
+        AudioEvents.RaiseAudioCue(AudioCueType.InventoryOpen);
+
 
         _openInventoryAnimSequence = DOTween.Sequence();
         _openInventoryAnimSequence.Append(_inventoryPanel.DOAnchorPos(_inventoryPanelVisiblePosition, _inventoryPanelAnimationDuration).SetEase(Ease.OutBack))
@@ -94,6 +103,8 @@ public class InventoryAnimation : MonoBehaviour
                 _inventorySlots.GetChild(i).DOScale(Vector3.one, _inventorySlotAnimationDuration).SetEase(Ease.OutBack));
         }
 
+        _openInventoryAnimSequence.OnComplete(() => OnInventoryOpened?.Invoke());
+
         _isInventoryOpen = true;
     }
 
@@ -102,11 +113,14 @@ public class InventoryAnimation : MonoBehaviour
 
         _openInventoryAnimSequence?.Kill();
         _closeInventoryAnimSequence?.Kill();
+        AudioEvents.RaiseAudioCue(AudioCueType.InventoryClose);
+
 
         _closeInventoryAnimSequence = DOTween.Sequence();
         _closeInventoryAnimSequence.Append(_inventoryTitlePanel.DOScale(Vector3.zero, _inventoryTitlePanelAnimationDuration).SetEase(Ease.InBack))
             .Join(_inventoryCanvasGroup.DOFade(0, _inventoryPanelAnimationDuration).SetEase(Ease.InQuad))
-            .Append(_inventoryPanel.DOAnchorPos(_inventoryPanelHiddenPosition, _inventoryPanelAnimationDuration).SetEase(Ease.InBack));
+            .Append(_inventoryPanel.DOAnchorPos(_inventoryPanelHiddenPosition, _inventoryPanelAnimationDuration).SetEase(Ease.InBack))
+            .OnComplete(() => OnInventoryClosed?.Invoke());
 
         _isInventoryOpen = false;
     }

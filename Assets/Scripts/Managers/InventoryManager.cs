@@ -23,9 +23,10 @@ public class InventoryManager : MonoBehaviour
 
     public int MaxNumberOfItems => _maxNumberOfItems;
 
-    #region events
-    public event System.Action OnInventoryChanged; 
-    public event System.Action OnInventoryFull; 
+    #region Events
+    public event System.Action OnInventoryChanged;
+    public event System.Action OnInventoryFull;
+    public event System.Action<ItemData> OnItemUsed;
     #endregion
 
     private void Awake()
@@ -38,7 +39,7 @@ public class InventoryManager : MonoBehaviour
         _itemsInInventory.Clear();
 
         // Inizializzo con null così la lista ha sempre esattamente _maxNumberOfItems elementi.
-        for (int i = 0; i < _maxNumberOfItems; i++) 
+        for (int i = 0; i < _maxNumberOfItems; i++)
         {
             _itemsInInventory.Add(null);
         }
@@ -52,12 +53,12 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        for (int i = 0; i < _itemsInInventory.Count; i++) 
+        for (int i = 0; i < _itemsInInventory.Count; i++)
         {
             if (_itemsInInventory[i] == null)
             {
                 _itemsInInventory[i] = item;
-                OnInventoryChanged?.Invoke(); 
+                OnInventoryChanged?.Invoke();
                 return true;
 
             }
@@ -65,7 +66,8 @@ public class InventoryManager : MonoBehaviour
         }
 
         Debug.LogWarning("Inventory is full!");
-        OnInventoryFull?.Invoke(); 
+        OnInventoryFull?.Invoke();
+        AudioEvents.RaiseAudioCue(AudioCueType.InventoryFull);
         return false;
 
     }
@@ -79,7 +81,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         // Imposto null invece di rimuovere l'elemento così gli indici degli slot rimangono stabili.
-        _itemsInInventory[index] = null; 
+        _itemsInInventory[index] = null;
 
         OnInventoryChanged?.Invoke();
     }
@@ -104,11 +106,13 @@ public class InventoryManager : MonoBehaviour
         }
 
         // Lo swap funziona sia per spostamento in slot vuoto che per scambio con slot occupato.
-        ItemData temp = _itemsInInventory[fromIndex]; 
+        ItemData temp = _itemsInInventory[fromIndex];
 
         _itemsInInventory[fromIndex] = _itemsInInventory[toIndex];
         _itemsInInventory[toIndex] = temp;
+
         OnInventoryChanged?.Invoke();
+        AudioEvents.RaiseAudioCue(AudioCueType.Swap);
 
     }
 
@@ -133,19 +137,26 @@ public class InventoryManager : MonoBehaviour
 
         if (item == null)
         {
-            Debug.LogWarning("Item not assigned");
+            Debug.LogWarning("Item not assigned. ");
             return;
         }
 
         if (item.Effect == null)
         {
-            Debug.LogWarning("Effect not assigned to item");
+            Debug.LogWarning("Effect not assigned to item. ");
             return;
         }
 
-        item.Effect.ApplyEffect(_playerStats, item.Amount);
+        bool effectApplied = item.Effect.ApplyEffect(_playerStats, item.Amount);
 
-        RemoveItem(index);
+        if (effectApplied)
+        {
+            OnItemUsed?.Invoke(item);
+            AudioEvents.RaiseAudioClip(item.Effect.AudioClip);
+            RemoveItem(index);
+        }
+
+
     }
 
     #region DEBUG METHODS

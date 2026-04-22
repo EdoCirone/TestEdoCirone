@@ -90,7 +90,6 @@ public class InventoryUI : MonoBehaviour
             _slots[i].Initialize(_inventoryManager, i, _inventoryPanel, _playerItemDropper); 
         }
 
-        HideFullInventoryMessage();
         RefreshInventoryUI();
 
     }
@@ -110,7 +109,6 @@ public class InventoryUI : MonoBehaviour
         if (_inventoryManager == null || _isSubscribedToEvents) return;
 
         _inventoryManager.OnInventoryChanged += RefreshInventoryUI; 
-        _inventoryManager.OnInventoryFull += ShowFullInventoryMessage;
         _isSubscribedToEvents = true;
     }
 
@@ -118,7 +116,6 @@ public class InventoryUI : MonoBehaviour
     {
         if (_inventoryManager == null || !_isSubscribedToEvents) return;
         _inventoryManager.OnInventoryChanged -= RefreshInventoryUI; 
-        _inventoryManager.OnInventoryFull -= ShowFullInventoryMessage;
         _isSubscribedToEvents = false;
     }
 
@@ -155,27 +152,6 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    private void ShowFullInventoryMessage()
-    {
-        if (_fullInventoryMessagePanel == null)
-        {
-            Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
-            return;
-        }
-        _fullInventoryMessagePanel.gameObject.SetActive(true); 
-
-    }
-
-    public void HideFullInventoryMessage()
-    {
-        if (_fullInventoryMessagePanel == null)
-        {
-            Debug.LogError("FullInventoryMessagePanel reference is missing in InventoryUI.");
-            return;
-        }
-
-        _fullInventoryMessagePanel.gameObject.SetActive(false); 
-
-    }
+   
 
 }

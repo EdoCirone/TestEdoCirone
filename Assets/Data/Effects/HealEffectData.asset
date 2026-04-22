@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cde3c06b54f6f045975390d3d890048, type: 3}
   m_Name: HealEffectData
   m_EditorClassIdentifier: Assembly-CSharp::HealEffectData
+  _audioClip: {fileID: 8300000, guid: 8d21acbe5314a714699b7214f825c3f5, type: 3}
