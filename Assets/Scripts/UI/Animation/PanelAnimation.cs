@@ -49,7 +49,7 @@ public class PanelAnimation : MonoBehaviour
         _closeAnimSeq?.Kill();
 
         _canvasGroup.blocksRaycasts = false;
-        _closeAnimSeq = DOTween.Sequence();
+        _closeAnimSeq = DOTween.Sequence().SetUpdate(true);
         _closeAnimSeq.Append(this.transform.DOScale(Vector3.zero, _animationDuration).SetEase(Ease.InBack))
             .Join(_canvasGroup.DOFade(0, _animationDuration).SetEase(Ease.InQuad))
             .OnComplete(() => this.gameObject.SetActive(false));

@@ -10,12 +10,10 @@ public class InventoryManager : MonoBehaviour
     [Header("Inventory Settings")]
     [SerializeField] private int _maxNumberOfItems = 9;
 
-    [Header("References")]
-    [SerializeField] private PlayerStats _playerStats;
-
     // Lista a dimensione fissa dove null rappresenta uno slot vuoto.
     // Mantenere la dimensione costante semplifica il mapping UI:
     // l'indice i nella lista corrisponde sempre allo slot i sullo schermo.
+    [Header("Inventory State")]
     [SerializeField] private List<ItemData> _itemsInInventory = new List<ItemData>();
 
     // Espongo in sola lettura per impedire a codice esterno di bypassare la logica dell'inventario.
@@ -23,21 +21,14 @@ public class InventoryManager : MonoBehaviour
 
     public int MaxNumberOfItems => _maxNumberOfItems;
 
-    public PlayerStats PlayerStats => _playerStats;
-
     #region Events
     public event System.Action OnInventoryChanged;
     public event System.Action OnInventoryFull;
-    public event System.Action<ItemData> OnItemUsed;
     #endregion
 
     private void Awake()
     {
-        if (_playerStats == null)
-        {
-            Debug.LogWarning("PlayerStats reference is not assigned in InventoryManager.");
-        }
-
+       
         _itemsInInventory.Clear();
 
         // Inizializzo con null così la lista ha sempre esattamente _maxNumberOfItems elementi.
@@ -119,64 +110,7 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    public void UseItem(int index)
-    {
-
-        if (index < 0 || index >= _itemsInInventory.Count)
-        {
-            Debug.LogWarning("Invalid item index.");
-            return;
-        }
-
-        if (_playerStats == null)
-        {
-            Debug.LogWarning("PlayerStats reference is not assigned.");
-            return;
-        }
-
-
-        ItemData item = _itemsInInventory[index];
-
-        if (item == null)
-        {
-            Debug.LogWarning("Item not assigned. ");
-            return;
-        }
-
-        if (item.Effect == null)
-        {
-            Debug.LogWarning("Effect not assigned to item. ");
-            return;
-        }
-
-        bool effectApplied = item.Effect.ApplyEffect(_playerStats, item.Amount);
-
-        if (effectApplied)
-        {
-            OnItemUsed?.Invoke(item);
-            AudioEvents.RaiseAudioClip(item.Effect.AudioClip);
-            RemoveItem(index);
-        }
-
-
-    }
-
     #region DEBUG METHODS
-
-    [ContextMenu("Use Test Item")]
-    private void UseFirstItemForDebug()
-    {
-        for (int i = 0; i < _itemsInInventory.Count; i++)
-        {
-            if (_itemsInInventory[i] != null)
-            {
-                UseItem(i);
-                return;
-            }
-        }
-
-        Debug.LogWarning("No items in inventory to use.");
-    }
 
     [ContextMenu("Remove First Item")]
     private void RemoveFirstItemForDebug()

@@ -30,6 +30,8 @@ public class InventoryAnimation : MonoBehaviour
 
     #endregion
 
+    public bool IsInventoryOpen() => _isInventoryOpen;
+
     private void Awake()
     {
         if (_inventoryPanel == null || _inventoryTitlePanel == null || _inventorySlots == null)
@@ -92,7 +94,7 @@ public class InventoryAnimation : MonoBehaviour
         AudioEvents.RaiseAudioCue(AudioCueType.InventoryOpen);
 
 
-        _openInventoryAnimSequence = DOTween.Sequence();
+        _openInventoryAnimSequence = DOTween.Sequence().SetUpdate(true);
         _openInventoryAnimSequence.Append(_inventoryPanel.DOAnchorPos(_inventoryPanelVisiblePosition, _inventoryPanelAnimationDuration).SetEase(Ease.OutBack))
             .Join(_inventoryCanvasGroup.DOFade(1, _inventoryPanelAnimationDuration).SetEase(Ease.OutQuad))
             .Append(_inventoryTitlePanel.DOScale(Vector3.one, _inventoryTitlePanelAnimationDuration).SetEase(Ease.OutBack));
@@ -103,7 +105,11 @@ public class InventoryAnimation : MonoBehaviour
                 _inventorySlots.GetChild(i).DOScale(Vector3.one, _inventorySlotAnimationDuration).SetEase(Ease.OutBack));
         }
 
-        _openInventoryAnimSequence.OnComplete(() => OnInventoryOpened?.Invoke());
+        _openInventoryAnimSequence.OnComplete(() =>
+        {
+            OnInventoryOpened?.Invoke();
+            _inventoryCanvasGroup.blocksRaycasts = true;
+        });
 
         _isInventoryOpen = true;
     }
@@ -116,7 +122,7 @@ public class InventoryAnimation : MonoBehaviour
         AudioEvents.RaiseAudioCue(AudioCueType.InventoryClose);
 
 
-        _closeInventoryAnimSequence = DOTween.Sequence();
+        _closeInventoryAnimSequence = DOTween.Sequence().SetUpdate(true);
         _closeInventoryAnimSequence.Append(_inventoryTitlePanel.DOScale(Vector3.zero, _inventoryTitlePanelAnimationDuration).SetEase(Ease.InBack))
             .Join(_inventoryCanvasGroup.DOFade(0, _inventoryPanelAnimationDuration).SetEase(Ease.InQuad))
             .Append(_inventoryPanel.DOAnchorPos(_inventoryPanelHiddenPosition, _inventoryPanelAnimationDuration).SetEase(Ease.InBack))

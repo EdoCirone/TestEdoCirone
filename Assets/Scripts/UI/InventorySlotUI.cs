@@ -7,25 +7,29 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     [SerializeField] private Image _itemIcon;
     [SerializeField] private float _iconDropSize = 64f; // Dimensione fissa della preview durante il drag.
 
+    private int _slotIndex;
     private InventoryManager _inventoryManager;
     private RectTransform _inventoryPanel;
-    private Canvas _canvas;
     private PlayerItemDropper _playerItemDropper;
+    private Canvas _canvas;
+    private InventoryInteractionManager _interactionManager;
+
     private Image _iconCopy;
     private static InventorySlotUI _draggedItem; // Va bene per un solo drag attivo. Da rifare se si gestiscono più inventari contemporaneamente.
 
-    private int _slotIndex;
     private bool _isDroppedSuccessfully = false;
 
+    public event System.Action<int> OnSlotClickedEvent;
 
 
-    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel, PlayerItemDropper playerItemDropper)
+    public void Initialize(InventoryManager inventoryManager, int index, RectTransform inventoryPanel, PlayerItemDropper playerItemDropper, InventoryInteractionManager inventoryInteraction)
     {
         _slotIndex = index;
         _inventoryManager = inventoryManager;
         _inventoryPanel = inventoryPanel;
         _playerItemDropper = playerItemDropper;
         _canvas = _inventoryPanel.GetComponentInParent<Canvas>();
+        _interactionManager = inventoryInteraction;
     }
 
     public void SetItem(ItemData itemData)
@@ -60,12 +64,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnSlotClicked()
     {
-        if (_inventoryManager == null)
-        {
-            Debug.LogWarning("InventoryManager reference is not assigned in InventorySlotUI.");
-            return;
-        }
-        _inventoryManager.UseItem(_slotIndex);
+        OnSlotClickedEvent?.Invoke(_slotIndex);
     }
 
     #region DragAndDrop
@@ -81,6 +80,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (_inventoryManager == null)
         {
             Debug.LogWarning("InventoryManager reference is not assigned in InventorySlotUI.");
+            return;
+        }
+
+        if (_interactionManager != null && _interactionManager.IsContainerOpen())
+        {
             return;
         }
 
@@ -142,11 +146,9 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (_draggedItem != this)
         {
-            Debug.LogWarning("OnEndDrag called on a slot that is not the dragged item. This should not happen."); 
+            Debug.LogWarning("OnEndDrag called on a slot that is not the dragged item. This should not happen.");
             return;
         }
-
-        bool releasedInsideInventoryPanel = RectTransformUtility.RectangleContainsScreenPoint(_inventoryPanel, eventData.position, eventData.pressEventCamera); 
 
         if (_isDroppedSuccessfully)
         {
@@ -154,18 +156,24 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
             return;
         }
 
-        if (releasedInsideInventoryPanel)
+        bool releasedInsideInventoryPanel = RectTransformUtility.RectangleContainsScreenPoint(_inventoryPanel, eventData.position, eventData.pressEventCamera);
+
+        if (_interactionManager != null && _interactionManager.IsContainerOpen())
         {
-            _itemIcon.enabled = true;
-            CleanupDrag();
+            RestoreIconAndCleanup();
+            return;
+        }
+
+        if (releasedInsideInventoryPanel )
+        {
+            RestoreIconAndCleanup();
             return;
         }
 
         if (_playerItemDropper == null)
         {
             Debug.LogWarning("PlayerItemDropper reference is missing.");
-            _itemIcon.enabled = true;
-            CleanupDrag();
+            RestoreIconAndCleanup();
             return;
         }
 
@@ -173,8 +181,7 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         if (itemToDrop == null)
         {
-            _itemIcon.enabled = true;
-            CleanupDrag();
+            RestoreIconAndCleanup();
             return;
         }
 
@@ -183,13 +190,11 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (droppedSuccessfully)
         {
             _inventoryManager.RemoveItem(_slotIndex);
-        }
-        else
-        {
-            _itemIcon.enabled = true;
+            CleanupDrag();
+            return;
         }
 
-        CleanupDrag();
+        RestoreIconAndCleanup();
     }
 
     public void OnDrop(PointerEventData eventData)
@@ -224,6 +229,12 @@ public class InventorySlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         }
         _isDroppedSuccessfully = false;
         _draggedItem = null;
+    }
+
+    private void RestoreIconAndCleanup()
+    {
+        _itemIcon.enabled = true;
+        CleanupDrag();
     }
 
     #endregion
