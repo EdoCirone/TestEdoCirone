@@ -23,7 +23,7 @@ public class InventoryUI : MonoBehaviour
 
     // Traccia lo stato di iscrizione agli eventi per evitare doppie iscrizioni
     private bool _isSubscribedToEvents = false;
-    public InventoryUIType GetInventoryUIType() => _inventoryUIType; 
+    public InventoryUIType UIType => _inventoryUIType; 
 
     private void Awake()
     {

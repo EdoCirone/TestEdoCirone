@@ -12,7 +12,7 @@ public class InventoryInteractionManager : MonoBehaviour
     private InventoryAnimation _playerAnimation;
     private InventoryAnimation _containerAnimation;
 
-    bool _isContainerOpen = false;
+    private bool _isContainerOpen = false;
     public bool IsContainerOpen() => _isContainerOpen;
 
     public InventoryManager GetCurrentContainerInventory()
@@ -22,38 +22,61 @@ public class InventoryInteractionManager : MonoBehaviour
 
     private void Start()
     {
-        if (_containerInventoryUI == null || _playerInventoryUI == null || _playerInventoryHandler == null) return;
+        if (_playerInventoryUI == null)
+        {
+            Debug.LogError("Player Inventory UI reference is missing in InventoryInteractionManager.");
+            return;
+        }
 
-        _playerAnimation = _playerInventoryUI.gameObject.GetComponent<InventoryAnimation>();
-        _containerAnimation = _containerInventoryUI.gameObject.GetComponent<InventoryAnimation>();
+        if (_containerInventoryUI == null)
+        {
+            Debug.LogError("Container Inventory UI reference is missing in InventoryInteractionManager.");
+            return;
+        }
+
+        if (_playerInventoryHandler == null)
+        {
+            Debug.LogError("PlayerInventoryHandler reference is missing in InventoryInteractionManager.");
+            return;
+        }
+
+        _playerAnimation = _playerInventoryUI.GetComponent<InventoryAnimation>();
+        _containerAnimation = _containerInventoryUI.GetComponent<InventoryAnimation>();
+
+        if (_playerAnimation == null)
+        {
+            Debug.LogError("InventoryAnimation is missing on PlayerInventoryUI.");
+        }
+
+        if (_containerAnimation == null)
+        {
+            Debug.LogError("InventoryAnimation is missing on ContainerInventoryUI.");
+        }
     }
-
     public void OpenContainer(InventoryManager playerInventory, InventoryManager containerInventory)
     {
         _currentContainerInventory = containerInventory;
         _playerInventory = playerInventory;
-
-
-        _isContainerOpen = true;
-        Time.timeScale = 0f; // Pause the game when the chest is open
 
         _playerInventoryUI.SetInventory(_playerInventory);
         _containerInventoryUI.SetInventory(_currentContainerInventory);
 
         _playerInventoryUI.gameObject.SetActive(true);
 
-        if (!_playerAnimation.IsInventoryOpen())
+        if (_playerAnimation != null && !_playerAnimation.IsInventoryOpen())
         {
-            _playerAnimation?.OnOpenInventory();
+            _playerAnimation.OnOpenInventory();
         }
-
 
         _containerInventoryUI.gameObject.SetActive(true);
-        _containerAnimation = _containerInventoryUI.gameObject.GetComponent<InventoryAnimation>();
-        if (!_containerAnimation.IsInventoryOpen())
+        if (_containerAnimation != null && !_containerAnimation.IsInventoryOpen())
         {
-            _containerAnimation?.OnOpenInventory();
+            _containerAnimation.OnOpenInventory();
         }
+
+        _isContainerOpen = true;
+        Time.timeScale = 0f; // Pause the game when the chest is open
+
     }
 
     public void CloseContainer()
@@ -63,7 +86,6 @@ public class InventoryInteractionManager : MonoBehaviour
         _playerAnimation?.OnCloseInventory();
 
         Time.timeScale = 1f; // Resume the game when the chest is closed
-        //_containerInventoryUI.gameObject.SetActive(false);
 
     }
 
@@ -82,17 +104,18 @@ public class InventoryInteractionManager : MonoBehaviour
 
         if (_isContainerOpen)
         {
-            if (sourceUI.GetInventoryUIType() == InventoryUIType.Player)
+            if (sourceUI.UIType == InventoryUIType.Player)
             {
                 TransferItem(_playerInventory, _currentContainerInventory, index);
             }
-            else if (sourceUI.GetInventoryUIType() == InventoryUIType.Container)
+            else if (sourceUI.UIType == InventoryUIType.Container)
             {
                 TransferItem(_currentContainerInventory, _playerInventory, index);
             }
+            return;
         }
 
-        if (sourceUI.GetInventoryUIType() == InventoryUIType.Player)
+        if (sourceUI.UIType == InventoryUIType.Player)
         {
             if (_playerInventoryHandler == null)
             {

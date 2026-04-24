@@ -126,7 +126,11 @@ public class InventoryAnimation : MonoBehaviour
         _closeInventoryAnimSequence.Append(_inventoryTitlePanel.DOScale(Vector3.zero, _inventoryTitlePanelAnimationDuration).SetEase(Ease.InBack))
             .Join(_inventoryCanvasGroup.DOFade(0, _inventoryPanelAnimationDuration).SetEase(Ease.InQuad))
             .Append(_inventoryPanel.DOAnchorPos(_inventoryPanelHiddenPosition, _inventoryPanelAnimationDuration).SetEase(Ease.InBack))
-            .OnComplete(() => OnInventoryClosed?.Invoke());
+            .OnComplete(() =>
+            {
+                OnInventoryClosed?.Invoke();
+                this.gameObject.SetActive(false);
+            });
 
         _isInventoryOpen = false;
     }

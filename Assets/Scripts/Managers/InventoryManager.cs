@@ -28,11 +28,14 @@ public class InventoryManager : MonoBehaviour
 
     private void Awake()
     {
-       
-        _itemsInInventory.Clear();
 
-        // Inizializzo con null così la lista ha sempre esattamente _maxNumberOfItems elementi.
-        for (int i = 0; i < _maxNumberOfItems; i++)
+        while (_itemsInInventory.Count > _maxNumberOfItems)
+        {
+            _itemsInInventory.RemoveAt(_itemsInInventory.Count - 1);
+        }
+
+
+        for (int i = _itemsInInventory.Count; i < _maxNumberOfItems; i++)
         {
             _itemsInInventory.Add(null);
         }
