@@ -41,6 +41,8 @@ Effetti implementati:
 - Swap automatico se il target è occupato
 - Drop nel mondo se rilasciato fuori dal pannello inventario
 - Preview icona creata a runtime con `Image` separata
+- Drag limitato a singolo inventario (no cross-inventory)
+- Stato drag gestito tramite riferimento statico (una sola operazione attiva)
 
 ### HUD
 - Barra salute
@@ -53,6 +55,8 @@ Effetti implementati:
 - Apparizione slot in cascata
 - Chiusura animata
 - Warning inventario pieno su canvas separato
+- Refresh UI forzato all’apertura inventario per garantire coerenza stato
+- Cambio inventario (`SetInventory`) gestisce unsubscribe/subscribe eventi
 
 ### UI Panels (event-driven feedback)
 Sistema centralizzato per la gestione dei pannelli UI:
@@ -97,6 +101,7 @@ Nota: `ExitGame()` funziona solo in build.
 - **InventoryManager** → gestione inventario
 - **PlayerStats** → salute e statistiche
 - **GameManager** → gestione scena
+- **InventoryInteractionManager** → gestione interazioni tra inventari (player/container) e logica di trasferimento item
 
 ### Item e dati
 - **ItemData** → dati item
@@ -107,6 +112,7 @@ Nota: `ExitGame()` funziona solo in build.
 - **ItemPickerControl** → rappresenta item nel mondo
 - **PlayerItemCollector** → raccolta item
 - **PlayerItemDropper** → drop nel mondo
+- **EventSystem.IsPointerOverGameObject** Interazione mondo bloccata quando il puntatore è sopra UI 
 
 ### UI
 - **InventoryUI** → gestione UI inventario
@@ -171,6 +177,11 @@ Evita problemi di scala e gerarchia UI.
 ### 5. Animazioni poco leggibili
 **Soluzione:** sequenza DOTween strutturata.
 
+### 6. Click UI propagava al mondo
+**Soluzione:** filtro tramite `EventSystem.IsPointerOverGameObject`
+
+### 7. UI non aggiornata all’apertura inventario
+**Soluzione:** refresh manuale + gestione corretta subscription eventi
 ---
 
 ## Limiti attuali
@@ -181,6 +192,8 @@ Evita problemi di scala e gerarchia UI.
 - No tipologie avanzate di item
 - Drop richiede raycast valido
 - AudioMixer non implementato (gestione volumi base tramite AudioSource)
+- Drag non supporta ancora trasferimento tra inventari
+- Uso di `OnMouseDown` per interazione mondo (non scalabile)
 
 ---
 
@@ -223,7 +236,7 @@ Evita problemi di scala e gerarchia UI.
 
 ## Estensioni future
 
-- inventari multipli
+- drag & drop tra inventari (player ↔ container)
 - stack item
 - tooltip
 - ordinamento
