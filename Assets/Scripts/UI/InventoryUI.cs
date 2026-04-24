@@ -23,7 +23,7 @@ public class InventoryUI : MonoBehaviour
 
     // Traccia lo stato di iscrizione agli eventi per evitare doppie iscrizioni
     private bool _isSubscribedToEvents = false;
-    public InventoryUIType UIType => _inventoryUIType; 
+    public InventoryUIType UIType => _inventoryUIType;
 
     private void Awake()
     {
@@ -179,7 +179,7 @@ public class InventoryUI : MonoBehaviour
 
     private void HandleSlotClicked(int index)
     {
-      if(_interactionManager == null)
+        if (_interactionManager == null)
         {
             Debug.LogWarning("InventoryInteractionManager reference is missing in InventoryUI.");
             return;
@@ -189,8 +189,20 @@ public class InventoryUI : MonoBehaviour
 
     public void SetInventory(InventoryManager inventory)
     {
+        if (_isSubscribedToEvents)
+        {
+            UnsubscribeFromEvents();
+        }
+
         _inventoryManager = inventory;
         InitializeSlots();
+
+        SubscribeToEvents();
+        RefreshInventoryUI();
+    }
+
+    public void Refresh()
+    {
         RefreshInventoryUI();
     }
 

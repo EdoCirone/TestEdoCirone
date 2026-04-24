@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class ChestInteractor : MonoBehaviour
 {
@@ -26,9 +27,13 @@ public class ChestInteractor : MonoBehaviour
     }
     private void OnMouseDown()
     {
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
         OpenChestOnClick();
     }
-
     public void OpenChestOnClick()
     {
         if (_interactionManager == null || _playerInventory == null || _chestInventory == null)

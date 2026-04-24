@@ -79,6 +79,13 @@ public class InventoryInteractionManager : MonoBehaviour
 
     }
 
+    public void OpenPlayerInv()
+    {
+
+        _playerInventoryUI?.Refresh();
+        _playerAnimation?.ToggleInventory();
+    }
+
     public void CloseContainer()
     {
         _isContainerOpen = false;

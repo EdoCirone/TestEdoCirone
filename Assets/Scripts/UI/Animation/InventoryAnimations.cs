@@ -93,6 +93,7 @@ public class InventoryAnimation : MonoBehaviour
         //L'audio parte prima dell'animazione e non a OnComplete perché voglio che il suono sia sincronizzato con l'inizio dell'animazione, non con la fine.
         AudioEvents.RaiseAudioCue(AudioCueType.InventoryOpen);
 
+        this.gameObject.SetActive(true);
 
         _openInventoryAnimSequence = DOTween.Sequence().SetUpdate(true);
         _openInventoryAnimSequence.Append(_inventoryPanel.DOAnchorPos(_inventoryPanelVisiblePosition, _inventoryPanelAnimationDuration).SetEase(Ease.OutBack))
